@@ -2,23 +2,18 @@
  * Created by zhangweiwei on 16/9/7.
  */
 
-const BASE_URL = 'https://anxinmuying.applinzi.com/Public/demo/?';
-
-//用于管理项目请求地址
-export const Method = {
-    test: BASE_URL + "service=Album.GetList",
-};
-
 //用于管理router中页面名称
 export const PageName = {
-    index: 'index',
-    demo_page: 'demo_page',
-    list: 'list'
+    analyze: 'analyze',
+    list: 'list',
+    table: 'table',
+    app: 'app'
 };
 
 //用于管理是否需要使用keepAlive缓存
 export const keepAlive = [
-    PageName.index
+    PageName.list,
+    PageName.analyze,
 ];
 
 //用于管理LocalStorage key

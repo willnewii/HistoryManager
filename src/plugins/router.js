@@ -3,24 +3,25 @@ import Router from 'vue-router';
 import Pages from '../pages/index';
 import * as Constants from '../assets/js/Constants';
 
-function addRouter(name, meta) {
-    routes.push({
+function generateRoute(name, meta) {
+    return {
         path: '/' + name.replace(/-/g, '/'),
         name: name,
         component: Pages[name],
         meta: Object.assign({keepAlive: true}, meta)
-    });
+    };
+}
+
+function addRouter(name, meta) {
+    routes.push(generateRoute(name, meta));
 }
 
 Vue.use(Router);
 
-let routes = [{
-    path: '/',
-    name: Constants.PageName.list,
-    component: Pages[Constants.PageName.list],
-    meta: {keepAlive: true, title: '历史记录'},
-    children: []
-}];
+let routes = [
+    generateRoute(Constants.PageName.list, {title: '历史记录'}),
+    generateRoute(Constants.PageName.analyze, {title: '数据分析'})
+];
 
 let router = new Router({
     routes

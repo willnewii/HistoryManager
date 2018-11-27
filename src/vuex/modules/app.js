@@ -6,22 +6,32 @@ import * as types from '../mutation-types';
 export default {
     state: {
         app: {
-            count: 10
+            datas: [],       //搜索结果
+            selection: []    //已选择列表
         }
     },
     mutations: {
-        [types.APP.count](state, value) {
-            state.app.count = state.app.count + 2;
+        [types.APP.datas](state, value) {
+            state.app.datas = value;
+        },
+        [types.APP.selection](state, value) {
+            state.app.selection = value;
         },
     },
     actions: {
-        [types.APP.count](context, value) {
-            context.commit(types.APP.count, value);
+        [types.APP.datas](context, value) {
+            context.commit(types.APP.datas, value);
+        },
+        [types.APP.selection](context, value) {
+            context.commit(types.APP.selection, value);
         },
     },
     getters: {
-        [types.APP.count](state) {
-            return state.app.count;
+        [types.APP.datas](state) {
+            return state.app.datas;
+        },
+        [types.APP.selection](state) {
+            return state.app.selection;
         },
 
     }

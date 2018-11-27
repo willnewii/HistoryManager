@@ -5,8 +5,11 @@ import Vue from 'vue';
 // 加载路由
 import router from './plugins/router';
 
+// vuex
+import store from "./vuex/store";
+
 // 注册全局组件
-import {} from './plugins/loadComponent';
+import {i18n} from './plugins/loadComponent';
 
 
 import {} from './assets/js/mixins/mixins-base';
@@ -29,6 +32,8 @@ import App from './layouts/App.vue';
 new Vue({
     el: '#app',
     router,
+    store,
+    i18n,
     template: '<App/>',
     components: {
         App
@@ -36,9 +41,9 @@ new Vue({
 });
 
 // offline网络连接事件
-window.addEventListener("offline", function () {
+/*window.addEventListener("offline", function () {
     alert("网络连接已断开");
-});
+});*/
 
 
 /*window.addEventListener("load", function () {
