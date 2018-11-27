@@ -45,9 +45,11 @@ module.exports = {
     dll: {
         vendors: [
             'vue',
+            'vuex',
             'vue-router',
+            'vue-i18n',
+            'highcharts/highcharts',
             'dayjs',
-            'iview/src/components/table',
             'iview/src/components/button',
             'iview/src/components/date-picker',
             'iview/src/components/header',

@@ -1,190 +1,114 @@
 <template>
-    <div class="page">
-        <Header>
-            <!--<div class="layout-logo"></div>-->
-
-            <div class="header-nav">
-                <div class="actions" v-if="selection && selection.length > 0">
-                    <Button class="button" @click="doDelete">删除({{selection.length}})</Button>
-                    <Button class="button" @click="doCancle">取消</Button>
-                </div>
-
-                <div class="result">{{tipStr}} {{datas.length}}条数据</div>
-
-                <Input search enter-button="Search" placeholder="Enter something..." />
-
-                <Date-Picker @on-change='onDateChange' type="daterange" split-panels placement="bottom-end"
-                             placeholder="选取日期" style="width: 200px;"></Date-Picker>
-                <!--<Button @click="doSearch">搜索</Button>-->
-            </div>
-        </Header>
-
-        <div ref='table-view' class='table' :style="{height:tableHeight + 'px'}">
-            <!-- <div class="item" v-for='item in datas'>
-                <span class="visitTime">{{formatTime(item.visitTime)}}</span>
-                <span class="title">{{item.title}}</span>
-                <span class="url">{{item.url}}</span>
-            </div> -->
-            <Table ref="table" v-if='tableHeight > 0' @on-selection-change="onSelect" :columns="columns" :data="datas"
-                   :height='tableHeight'></Table>
+    <div ref='table-view' class='table' :style="{height:tableHeight + 'px'}">
+        <div class="item header">
+            <Checkbox class="checkbox" v-model="allSelect" @on-change="onAllSelect"></Checkbox>
+            <span class="visitTime">{{$t('message.table_visitTime')}}</span>
+            <span class="title">{{$t('message.table_title')}}</span>
+            <span class="url">url</span>
+            <span class="count">{{$t('message.table_visitCount')}}</span>
+        </div>
+        <div ref="list-view" style="flex-grow: 1">
+            <CheckboxGroup v-model="selectCroup" @on-change="onSelect">
+                <!--<div class="item" v-for='(item,index) in datas' :key="index">
+                    <div v-if="!loadCheckbox" class="checkbox"></div>
+                    <Checkbox v-else class="checkbox" :label="item.id"><span></span></Checkbox>
+                    <span class="visitTime">{{formatTime(item.visitTime)}}</span>
+                    <span class="title">{{item.title}}</span>
+                    <span class="url">{{item.url}}</span>
+                    <span class="count">{{item.visitCount}}</span>
+                </div>-->
+                <recycle-list v-if="datas.length > 0" :style="{height:listHeight + 'px'}" :on-fetch="onFetch">
+                    <div class="item" slot="item" slot-scope="{ data }">
+                        <div v-if="!loadCheckbox" class="checkbox"></div>
+                        <Checkbox v-else class="checkbox" :label="data.id"><span></span></Checkbox>
+                        <span class="visitTime">{{formatTime(data.visitTime)}}</span>
+                        <span class="title">{{data.title}}</span>
+                        <span class="url">{{data.url}}</span>
+                        <span class="count">{{data.visitCount}}</span>
+                    </div>
+                </recycle-list>
+            </CheckboxGroup>
         </div>
     </div>
 </template>
 
 <script>
-    import {Constants, EventBus, mixins, util} from "../assets/js/index";
+    import {Constants, mixins, util} from "../assets/js/index";
 
-    import mockData from '../mock';
-    import dayjs from 'dayjs';
-
-    const microsecondsDay = 1000 * 60 * 60 * 24;
+    import {mapGetters, mapActions} from "vuex";
+    import * as types from "../vuex/mutation-types";
+    import RecycleList from "../components/recycle-list";
 
     export default {
+        components: {RecycleList},
         mixins: [mixins.base],
         name: Constants.PageName.list,
         data() {
             return {
-                tipStr: '',
                 tableHeight: 0,
-                datas: [],
-                selection: [],
-                columns: [{
-                    type: 'selection',
-                    width: 80,
-                    align: 'center'
-                }, {
-                    title: '查看时间',
-                    key: 'visitTime', // lastVisitTime visitTime
-                    width: 150,
-                    render: (h, params) => {
-                        return h('div', [
-                            h('span', util.formatTime(params.row.visitTime))
-                        ]);
-                    }
-                }, {
-                    title: '标题',
-                    key: 'title',
-                    width: 200,
-                }, {
-                    title: 'url',
-                    key: 'url',
-                    // width: '60%',
-                }, {
-                    title: '查看次数',
-                    key: 'visitCount',
-                    width: 100,
-                },
-                ]
+                listHeight: 0,
+                isLoaded: false,
+                loadCheckbox: false,
+                allSelect: false,
+                selectCroup: [],
             };
         },
+        computed: {
+            ...mapGetters({
+                datas: types.APP.datas,
+                selection: types.APP.selection,
+            })
+        },
+        watch: {
+            selection: function (val, oldVal) {
+                if (val.length === 0 && val.length !== oldVal.length) {
+                    this.allSelect = false;
+                    this.onAllSelect(false);
+                }
+            }
+        },
         created() {
-            this.doSearch();
         },
         mounted() {
             this.$nextTick(() => {
                 this.tableHeight = this.$refs['table-view'].offsetHeight;
+                this.listHeight = this.$refs['list-view'].offsetHeight;
+
+                setTimeout(() => {//checkbox 导致列表渲染异常缓慢.异步显示
+                    this.loadCheckbox = true;
+                }, 0);
             });
         },
         methods: {
+            ...mapActions({
+                actionSelection: types.APP.selection,
+            }),
             formatTime: util.formatTime,
-            doSearch() {
-                this.search();
-            },
-            onDateChange(values) {
-                if (!values[0] && !values[1]) {
-                    return;
-                }
-
-                let option = {
-                    startTime: dayjs(values[0]).valueOf(),
-                    endTime: dayjs(values[1]).valueOf() + microsecondsDay
-                };
-                this.search(option);
-            },
-            doDelete() {
-                let ids = [];
-                for (let item of this.selection) {
-                    ids.push(item.id);
-                }
-
-                for (let item of this.datas) {
-                    if (ids.indexOf(item.id) !== -1) {
-                        if (this.inChrome) {
-                            chrome.history.deleteRange({
-                                startTime: item.visitTime,
-                                endTime: item.visitTime + 1
-                            }, () => {
-                            });
-                        }
-                        let index = this.datas.indexOf(item);
-                        console.log(index, this.datas.length);
-                        this.datas.splice(index, 1);
+            onFetch() {
+                return new Promise((resolve) => {
+                    if (!this.isLoaded) {
+                        this.isLoaded = true;
+                        resolve(this.datas);
+                    } else {
+                        resolve(false);
                     }
-                }
-                this.doCancle();
+
+                });
             },
-            doCancle() {
-                this.$refs['table'].selectAll(false);
+            onSelect() {
+                this.actionSelection(this.selectCroup);
             },
-            onSelect(selection) {
-                this.selection = selection;
-            },
-            search(option = {}) {
-                console.time('数据查询');
-                option.endTime = option.endTime || (new Date).getTime();
-                option.startTime = option.startTime || option.endTime - microsecondsDay;
-
-                let visits = [];
-                let getVisitsCount = 0;
-
-                this.$Spin.show();
-                if (chrome.history) {
-                    chrome.history.search({
-                            'text': option.text || '',
-                            'startTime': option.startTime, //默认查询最近一天
-                            'endTime': option.endTime,
-                            'maxResults': 500
-                        },
-                        (historyItems) => {
-
-
-                            historyItems.sort(function (a, b) {
-                                return b.lastVisitTime - a.lastVisitTime;
-                                // return a.lastVisitTime - b.lastVisitTime;
-                            });
-                            getVisitsCount = historyItems.length;
-
-                            for (let item of historyItems) {
-                                chrome.history.getVisits({
-                                    url: item.url
-                                }, (lists) => {
-                                    getVisitsCount--;
-                                    let results = lists.filter((value) => {
-                                        value.url = item.url;
-                                        value.title = item.title;
-                                        value.visitCount = item.visitCount;
-                                        return (value.visitTime >= option.startTime && value.visitTime < option.endTime);
-                                    });
-                                    //visits = visits.concat(results);
-                                    //只显示时间段内最近的一条
-                                    visits.push(results[results.length - 1]);
-
-                                    if (getVisitsCount === 0) {
-                                        this.setData(visits);
-
-                                    }
-                                });
-                            }
-                        });
+            onAllSelect(status) {
+                if (status) {
+                    this.selectCroup = [];
+                    for (let i = 0; i < this.datas.length; i++) {
+                        this.selectCroup.push(this.datas[i].id);
+                    }
                 } else {
-                    this.setData(mockData.searchData);
+                    this.selectCroup = [];
                 }
+                this.onSelect();
             },
-            setData(datas) {
-                console.timeEnd('数据查询');
-                this.$Spin.hide();
-                this.datas = datas;
-            }
         }
     };
 </script>
@@ -193,58 +117,83 @@
 <style lang="scss" scoped>
     @import "../assets/scss/params";
 
-    .header-nav {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-end;
-
-        .actions {
-            flex-grow: 1;
-        }
-
-        .button {
-            margin-right: px2rem(10);
-        }
-
-        .result {
-            color: #ffffff;
-            margin-right: 10px;
-        }
-    }
-
     .table {
         flex-grow: 1;
-        overflow-y: auto;
-        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+
+        .header {
+            background-color: #f8f8f9 !important;
+            height: 40px !important;
+            line-height: 40px !important;
+        }
+
+        .scroll {
+            height: 100%;
+            overflow: scroll;
+            -webkit-overflow-scrolling: touch;
+        }
+
         .item {
-            padding: 10px;
+            background-color: #FFFFFF;
+            padding: 0 10px;
             display: flex;
             flex-direction: row;
+            border-bottom: 1px solid #e8eaec;
+            height: 48px;
+            line-height: 48px;
+
+            span {
+                word-break: break-all;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                font-size: 12px;
+                flex-shrink: 0;
+            }
+
+            .checkbox {
+                flex-shrink: 0;
+                width: 50px;
+                margin-right: 0px;
+            }
+
+            .visitTime {
+                width: 150px;
+                margin-right: 0;
+            }
+
+            .title {
+                margin-left: 20px;
+                width: 200px;
+            }
+
+            .url {
+                flex-shrink: 1;
+                margin-left: 20px;
+                flex-grow: 1;
+            }
+
+            .count {
+                width: 40px;
+                text-align: center;
+            }
         }
 
-        .visitTime {
-            flex-shrink: 0;
-        }
-
-        .title {
-            margin-left: 20px;
-            width: 200px;
-            flex-shrink: 0;
-            word-break: break-all;
-        }
-
-        .url {
-            margin-left: 20px;
-            overflow: hidden;
-            word-break: break-all;
-        }
     }
 </style>
-<style>
-    .ivu-layout-header {
-        height: 49px;
-        line-height: 49px;
-        padding: 0 30px;
+<style lang="scss">
+    .table-title-column {
+        span {
+            white-space: nowrap;
+        }
+    }
+
+    .ivu-table-cell {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .checkbox {
     }
 </style>
