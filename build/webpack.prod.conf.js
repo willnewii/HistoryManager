@@ -27,7 +27,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     },
     optimization: {
         minimizer: [
-            new UglifyJsPlugin({
+            /*new UglifyJsPlugin({
                 cache: true,
                 parallel: true,
                 sourceMap: config.build.productionSourceMap,
@@ -38,7 +38,7 @@ const webpackConfig = merge(baseWebpackConfig, {
                         drop_debugger: true,
                     }
                 }
-            }),
+            }),*/
             new OptimizeCSSPlugin({
                 cssProcessorOptions: config.build.productionSourceMap
                     ? {safe: true, map: {inline: false}}

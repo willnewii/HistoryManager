@@ -3,7 +3,8 @@
     "version": "1.0",
     "description": "Reads your history, and shows the top ten pages you go to by typing the URL.",
     "permissions": [
-        "history"
+        "history",
+        "chrome://favicon/"
     ],
     "icons": {
         "128": "icon.png"
@@ -13,8 +14,8 @@
         "default_icon": "icon.png"
     },
     "options_ui": {
-        "page": "index.html",
-        "chrome_style": true
+        "page": "index.html"
+        //        "chrome_style": true
     },
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "manifest_version": 2

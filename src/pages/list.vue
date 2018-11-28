@@ -5,35 +5,38 @@
             <span class="visitTime">{{$t('message.table_visitTime')}}</span>
             <span class="title">{{$t('message.table_title')}}</span>
             <span class="url">url</span>
-            <span class="count">{{$t('message.table_visitCount')}}</span>
+            <!--<span class="count">{{$t('message.table_visitCount')}}</span>-->
         </div>
         <div ref="list-view" style="flex-grow: 1">
             <CheckboxGroup v-model="selectCroup" @on-change="onSelect">
-                <!--<div class="item" v-for='(item,index) in datas' :key="index">
-                    <div v-if="!loadCheckbox" class="checkbox"></div>
-                    <Checkbox v-else class="checkbox" :label="item.id"><span></span></Checkbox>
-                    <span class="visitTime">{{formatTime(item.visitTime)}}</span>
-                    <span class="title">{{item.title}}</span>
-                    <span class="url">{{item.url}}</span>
-                    <span class="count">{{item.visitCount}}</span>
-                </div>-->
-                <recycle-list v-if="datas.length > 0" :style="{height:listHeight + 'px'}" :on-fetch="onFetch">
+                <recycle-list ref="recycle-list" :style="{height:listHeight + 'px'}"
+                              :on-fetch="onFetch" :size="20">
                     <div class="item" slot="item" slot-scope="{ data }">
                         <div v-if="!loadCheckbox" class="checkbox"></div>
                         <Checkbox v-else class="checkbox" :label="data.id"><span></span></Checkbox>
-                        <span class="visitTime">{{formatTime(data.visitTime)}}</span>
+                        <span class="visitTime">{{data.date}}</span>
+                        <span class="website-icon" id="icon"
+                              :style="{'background-image': `-webkit-image-set(url(chrome://favicon/size/16@1x/${data.url}) 1x, url(chrome://favicon/size/16@2x/${data.url}) 2x)`}"></span>
                         <span class="title">{{data.title}}</span>
                         <span class="url">{{data.url}}</span>
-                        <span class="count">{{data.visitCount}}</span>
+                        <span class="menu" @click="showMenu(data)">┇</span>
+                        <!--<span class="count">{{data.visitCount}}</span>-->
                     </div>
                 </recycle-list>
             </CheckboxGroup>
         </div>
+        <Modal v-model="menu.show" :closable="false" class-name="vertical-center-modal">
+            <span>{{menu.item.url}}</span>
+            <p class="modal-item-p" @click="action(0)">来自该网站的更多内容</p>
+            <p class="modal-item-p" @click="action(1)">从历史记录中移除</p>
+            <div slot="footer">
+            </div>
+        </Modal>
     </div>
 </template>
 
 <script>
-    import {Constants, mixins, util} from "../assets/js/index";
+    import {Constants, EventBus, mixins} from "../assets/js/index";
 
     import {mapGetters, mapActions} from "vuex";
     import * as types from "../vuex/mutation-types";
@@ -51,6 +54,10 @@
                 loadCheckbox: false,
                 allSelect: false,
                 selectCroup: [],
+                menu: {
+                    show: false,
+                    item: {},
+                }
             };
         },
         computed: {
@@ -60,6 +67,13 @@
             })
         },
         watch: {
+            datas: function (val) {
+                if (this.$refs['recycle-list']) {
+                    this.isLoaded = false;
+                    this.loadCheckbox = false;
+                    this.$refs['recycle-list'].init();
+                }
+            },
             selection: function (val, oldVal) {
                 if (val.length === 0 && val.length !== oldVal.length) {
                     this.allSelect = false;
@@ -73,17 +87,27 @@
             this.$nextTick(() => {
                 this.tableHeight = this.$refs['table-view'].offsetHeight;
                 this.listHeight = this.$refs['list-view'].offsetHeight;
-
-                setTimeout(() => {//checkbox 导致列表渲染异常缓慢.异步显示
-                    this.loadCheckbox = true;
-                }, 0);
             });
         },
         methods: {
             ...mapActions({
                 actionSelection: types.APP.selection,
             }),
-            formatTime: util.formatTime,
+            showMenu(item) {
+                this.menu.item = item;
+                this.menu.show = true;
+            },
+            action(type) {
+                switch (type) {
+                    case 0://搜索
+                        EventBus.$emit(Constants.EventBus.search, this.menu.item);
+                        break;
+                    case 1://删除
+                        EventBus.$emit(Constants.EventBus.delete, this.menu.item);
+                        break;
+                }
+                this.menu.show = false;
+            },
             onFetch() {
                 return new Promise((resolve) => {
                     if (!this.isLoaded) {
@@ -92,7 +116,9 @@
                     } else {
                         resolve(false);
                     }
-
+                    setTimeout(() => {//checkbox 导致列表渲染异常缓慢.异步显示
+                        this.loadCheckbox = true;
+                    }, 0);
                 });
             },
             onSelect() {
@@ -126,6 +152,10 @@
             background-color: #f8f8f9 !important;
             height: 40px !important;
             line-height: 40px !important;
+
+            .title {
+                margin-left: 20px !important;
+            }
         }
 
         .scroll {
@@ -139,6 +169,7 @@
             padding: 0 10px;
             display: flex;
             flex-direction: row;
+            align-items: center;
             border-bottom: 1px solid #e8eaec;
             height: 48px;
             line-height: 48px;
@@ -164,8 +195,13 @@
             }
 
             .title {
-                margin-left: 20px;
                 width: 200px;
+                margin-left: 4px;
+            }
+
+            .website-icon {
+                width: 16px;
+                height: 16px;
             }
 
             .url {
@@ -178,8 +214,21 @@
                 width: 40px;
                 text-align: center;
             }
+
+            .menu {
+                width: 40px;
+                text-align: center;
+            }
         }
 
+    }
+
+    .modal-item-p {
+        padding: 10px;
+
+        &:nth-child(1) {
+            border-bottom: 1px solid #f8f8f9;
+        }
     }
 </style>
 <style lang="scss">
@@ -195,5 +244,19 @@
     }
 
     .checkbox {
+    }
+
+    .vertical-center-modal {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .ivu-modal {
+            top: 0;
+        }
+
+        .ivu-modal-footer {
+            display: none;
+        }
     }
 </style>

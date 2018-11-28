@@ -24,11 +24,6 @@ export const LocalStorage = {
 
 //用于管理EventBus中的事件key
 export const EventBus = {
-    showToast: 'showToast',
-    toggleDrawer: 'toggleDrawer',
-    toggleMusic: 'toggleMusic',
-    userLogin: 'userLogin',
-    setTitle: 'setTitle',
-    setTitleLeftIcon: 'setTitleLeftIcon',
-    update_main_tab_index: 'update_main_tab_index'
+    search: 'search',
+    delete: 'delete',
 };

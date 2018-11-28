@@ -1,5 +1,5 @@
 <template>
-    <div class="cube-recycle-list">
+    <div ref="list" class="cube-recycle-list">
         <div class="cube-recycle-list-main">
             <div class="cube-recycle-list-items" :style="{height: heights + 'px'}">
                 <div
@@ -132,6 +132,10 @@
                 /* istanbul ignore if */
             },
             init() {
+                this.$refs['list'].scrollTop = 0;
+                this.list = [];
+                this.items = [];
+                this.loadings = [];
                 this.load();
             },
             load() {

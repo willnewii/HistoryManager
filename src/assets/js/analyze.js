@@ -26,4 +26,27 @@ function getPageView(visitData) {
     return {dates, count};
 }
 
-export {getPageView};
+function getTopSite(visitData) {
+    let hosts = [];
+    let counts = [];
+
+    for (let item of visitData) {
+        let host = new URL(item.url).host;
+
+        if (hosts.indexOf(host) === -1) {
+            hosts.push(host);
+            counts[hosts.length - 1] = {count: 1, ...item};
+        } else {
+            ++counts[hosts.indexOf(host)].count;
+        }
+    }
+
+
+    counts.sort(function (a, b) {
+        return b.count - a.count;
+    });
+
+    return counts;
+}
+
+export {getPageView, getTopSite};

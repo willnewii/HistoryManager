@@ -6,7 +6,6 @@ import 'iview/dist/styles/iview.css';
 import {
     DatePicker,
     Button,
-    Table,
     Header,
     Menu,
     Icon,
@@ -15,6 +14,7 @@ import {
     Layout,
     Input,
     CheckboxGroup,
+    Modal,
     Checkbox
 } from 'iview';
 
@@ -31,6 +31,7 @@ Vue.component('Layout', Layout);
 Vue.component('Input', Input);
 Vue.component('CheckboxGroup', CheckboxGroup);
 Vue.component('Checkbox', Checkbox);
+Vue.component('Modal', Modal);
 
 Vue.prototype.$Spin = Spin;
 

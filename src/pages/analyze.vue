@@ -1,5 +1,6 @@
 <template>
-    <div>
+    <div class="page">
+        <div ref="chart2"></div>
         <div ref="chart1"></div>
     </div>
 </template>
@@ -16,30 +17,41 @@
         mixins: [mixins.base,],
         name: Constants.PageName.analyze,
         data() {
-            return {
-                env: process.env.NODE_ENV
-            };
+            return {};
         },
         computed: {
             ...mapGetters({
                 datas: types.APP.datas,
             })
         },
+        watch: {
+            datas: function (val) {
+                if (val.length > 0) {
+                    this.getDatas();
+                }
+            },
+        },
         created() {
         },
         mounted() {
-            this.getPageView();
+            if (this.datas.length > 0) {
+                this.getDatas();
+            }
         },
         methods: {
+            getDatas() {
+                this.getPageView();
+
+                this.getDominView();
+            },
             getPageView() {
                 let result = analyze.getPageView(this.datas);
-                console.log(result, this.$refs.chart1);
                 Highcharts.chart(this.$refs.chart1, {
                     chart: {
                         type: 'column'
                     },
                     title: {
-                        text: ''
+                        text: '页面打开数'
                     },
                     subtitle: {
                         text: ''
@@ -60,14 +72,53 @@
                         }
                     },
                     legend: {
+                        enabled: false,
                         align: 'right',
                     },
                     series: [{
                         name: '页面打开数',
                         data: result.count,
+                        maxPointWidth: 10,
+                        minPointWidth: 1,
                         dataLabels: {
                             enabled: true,
                         }
+                    }]
+                });
+            },
+            getDominView() {
+                let result = analyze.getTopSite(this.datas).slice(0, 20);
+
+                let datas = [];
+                for (let item of result) {
+                    datas.push({name: new URL(item.url).hostname, y: item.count});
+                }
+
+                Highcharts.chart(this.$refs.chart2, {
+                    chart: {
+                        type: 'pie'
+                    },
+                    title: {
+                        text: '网站排行'
+                    },
+                    subtitle: {
+                        text: ''
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: '',
+                        }
+                    },
+                    legend: {
+                        align: 'right',
+                    },
+                    series: [{
+                        name: '网站排行',
+                        data: datas,
                     }]
                 });
             }
@@ -79,10 +130,7 @@
 <style lang="scss" scoped>
     @import "../assets/scss/params";
 
-    .title {
-        display: block;
-        padding: px2rem(16);
-        font-size: px2rem(16);
-        margin: 0;
+    .page {
+        padding: 10px 0;
     }
 </style>

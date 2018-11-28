@@ -21,6 +21,8 @@
     import {mapGetters, mapActions} from "vuex";
     import * as types from "../vuex/mutation-types";
 
+    import {util, EventBus, Constants, mixins} from "../assets/js/index";
+
     import mockData from '../mock';
     import dayjs from 'dayjs';
 
@@ -28,6 +30,7 @@
 
     export default {
         name: 'AppHeader',
+        mixins: [mixins.base],
         props: {
             test: {
                 type: String,
@@ -47,6 +50,15 @@
         },
         created() {
             this.doSearch();
+
+            EventBus.$on(Constants.EventBus.search, (value) => {
+                this.keyword = new URL(value.url).hostname;
+                this.search();
+            });
+
+            EventBus.$on(Constants.EventBus.delete, (value) => {
+                console.log(value);
+            });
         },
         methods: {
             ...mapActions({
@@ -70,11 +82,17 @@
                 for (let i = 0; i < tempdatas.length; i++) {
                     if (this.selection.indexOf(tempdatas[i].id) !== -1) {
                         if (this.inChrome) {
-                            chrome.history.deleteRange({
+                            console.log(tempdatas[i].url);
+                            //删除当前URL的所有记录
+                            chrome.history.deleteUrl({
+                                url: tempdatas[i].url,
+                            }, () => {
+                            });
+                            /*chrome.history.deleteRange({
                                 startTime: tempdatas[i].visitTime,
                                 endTime: tempdatas[i].visitTime + 1
                             }, () => {
-                            });
+                            });*/
                         }
                         let index = tempdatas.indexOf(tempdatas[i]);
                         tempdatas.splice(index, 1);
@@ -89,7 +107,6 @@
                 this.actionSelection([]);
             },
             doSearch() {
-                console.log(this.keyword);
                 this.search();
             },
             search(option = {}) {
@@ -101,17 +118,22 @@
                 let visits = [];
                 let getVisitsCount = 0;
 
+                console.log(option);
                 this.$Spin.show();
                 if (chrome.history) {
                     chrome.history.search({
                             'text': option.text,
                             'startTime': option.startTime, //默认查询最近一天
                             'endTime': option.endTime,
-                            'maxResults': 1000
+                            'maxResults': 10000
                         },
                         (historyItems) => {
-                            this.historyItems = historyItems;
                             getVisitsCount = historyItems.length;
+
+                            if (getVisitsCount === 0) {
+                                this.setData([]);
+                                return;
+                            }
 
                             for (let item of historyItems) {
                                 chrome.history.getVisits({
@@ -139,11 +161,17 @@
                             }
                         });
                 } else {
-                    // this.getPageView();
-                    this.setData(mockData.visitData);
+                    setTimeout(() => {
+                        this.setData(mockData.visitData);
+                    }, 2000);
                 }
             },
             setData(datas) {
+                //提前赋值,减少列表滑动时计算
+                for (let i = 0; i < datas.length; i++) {
+                    datas[i].date = util.formatTime(datas[i].visitTime);
+                }
+
                 console.timeEnd('数据查询');
                 this.$Spin.hide();
                 this.actionDatas(datas);
