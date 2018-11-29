@@ -13,9 +13,7 @@ import {
     Spin,
     Layout,
     Input,
-    CheckboxGroup,
     Modal,
-    Checkbox
 } from 'iview';
 
 Vue.component('DatePicker', DatePicker);
@@ -29,8 +27,6 @@ Vue.component('Icon', Icon);
 Vue.component('Spin', Spin);
 Vue.component('Layout', Layout);
 Vue.component('Input', Input);
-Vue.component('CheckboxGroup', CheckboxGroup);
-Vue.component('Checkbox', Checkbox);
 Vue.component('Modal', Modal);
 
 Vue.prototype.$Spin = Spin;
@@ -50,6 +46,9 @@ const messages = {
             table_visitTime: '查看时间',
             table_title: '标题',
             table_visitCount: '查看次数',
+            nearly_a_week: '近一周',
+            nearly_a_month: '近一月',
+            nearly_three_month: '近三月',
         },
     },
     en: {
@@ -63,15 +62,22 @@ const messages = {
             title_analyze: 'Analyze',
             table_visitTime: 'visitTime',
             table_title: 'title',
-            table_visitCount: 'count'
+            table_visitCount: 'count',
+            nearly_a_week: '1 week ago',
+            nearly_a_month: '1 month ago',
+            nearly_three_month: '3 months ago',
         },
     },
 
 };
 
 const i18n = new VueI18n({
-    locale: window.navigator.language !== 'zh-CN' ? 'zh-CN' : 'en', // set locale
+    locale: window.navigator.language === '1zh-CN' ? 'zh-CN' : 'en', // set locale
     messages, // set locale messages
 });
+
+import VueLazyload from 'vue-lazyload';
+
+Vue.use(VueLazyload);
 
 export {i18n};

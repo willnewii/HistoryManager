@@ -4,6 +4,7 @@
             <div class="cube-recycle-list-items" :style="{height: heights + 'px'}">
                 <div
                         v-for="item in visibleItems"
+                        :key="item.id"
                         class="cube-recycle-list-item"
                         :style="{transform: 'translate(0,' + item.top + 'px)'}">
                     <div
@@ -12,9 +13,8 @@
                             :style="{opacity: +!item.loaded}">
                         <slot name="tombstone"></slot>
                     </div>
-                    <div
-                            :class="{'cube-recycle-list-transition': infinite}"
-                            :style="{opacity: item.loaded}">
+                    <div :class="{'cube-recycle-list-transition': infinite}"
+                         :style="{opacity: item.loaded}">
                         <slot name="item" :data="item.data"></slot>
                     </div>
                 </div>
@@ -91,6 +91,7 @@
         },
         computed: {
             visibleItems() {
+                console.log('aaaa');
                 return this.items.slice(Math.max(0, this.startIndex - this.size), Math.min(this.items.length, this.startIndex + this.size));
             },
             tombHeight() {
@@ -119,7 +120,14 @@
             this.checkPromiseCompatibility();
         },
         mounted() {
-            this.$el.addEventListener(EVENT_SCROLL, this._onScroll);
+            /*this.$el.addEventListener(EVENT_SCROLL, this.debounce(() => {
+                // 滚动中的真正的操作
+                this._onScroll();
+            }, 100, false));*/
+            this.$el.addEventListener(EVENT_SCROLL, this.throttle(() => {
+                // 滚动中的真正的操作
+                this._onScroll();
+            }, 500, 1000));
             window.addEventListener(EVENT_RESIZE, this._onResize);
             this.init();
         },
@@ -237,13 +245,51 @@
                     this.startOffset = 0;
                 }
             },
+            // 防抖动函数
+            debounce(func, wait, immediate) {
+                var timeout;
+                return function () {
+                    var context = this, args = arguments;
+                    var later = function () {
+                        timeout = null;
+                        if (!immediate) func.apply(context, args);
+                    };
+                    var callNow = immediate && !timeout;
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                    if (callNow) func.apply(context, args);
+                };
+            },
+            // 节流函数
+            throttle(func, wait, mustRun) {
+                var timeout,
+                    startTime = new Date();
+
+                return function () {
+                    var context = this,
+                        args = arguments,
+                        curTime = new Date();
+
+                    clearTimeout(timeout);
+                    // 如果达到了规定的触发时间间隔，触发 handler
+                    if (curTime - startTime >= mustRun) {
+                        func.apply(context, args);
+                        startTime = curTime;
+                        // 没达到触发间隔，重新设定定时器
+                    } else {
+                        timeout = setTimeout(func, wait);
+                    }
+                };
+            },
             _onScroll() {
                 // trigger load
+                console.log('_onScroll');
                 if (this.$el.scrollTop + this.$el.offsetHeight > this.heights - this.offset) {
                     this.load();
                 }
                 this.updateIndex();
-            },
+            }
+            ,
             _onResize() {
                 this.getStartItemOffset();
                 this.items.forEach((item) => {

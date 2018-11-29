@@ -7,12 +7,13 @@
             </div>
 
             <div class="result">{{$t('message.resultCount', [datas.length])}}</div>
-
             <Input v-model="keyword" icon="ios-search" :placeholder="$t('message.str_search')"
                    class="search" @on-click="doSearch"/>
 
-            <Date-Picker @on-change='onDateChange' type="daterange" split-panels placement="bottom-end"
-                         :placeholder="$t('message.pick_date')" style="width: 200px;"></Date-Picker>
+            <Date-Picker @on-change='onDateChange' style="width: 200px;"
+                         type="daterange" split-panels
+                         placement="bottom-end"
+                         :options="dataOptions" :placeholder="$t('message.pick_date')"></Date-Picker>
         </div>
     </Header>
 </template>
@@ -26,20 +27,46 @@
     import mockData from '../mock';
     import dayjs from 'dayjs';
 
-    const microsecondsDay = 1000 * 60 * 60 * 24;
+    const microsecondsDay = 1000 * 3600 * 24;
 
     export default {
         name: 'AppHeader',
         mixins: [mixins.base],
-        props: {
-            test: {
-                type: String,
-                default: 'i am a template components'
-            }
-        },
+        props: {},
         data() {
             return {
                 keyword: '',
+                dataOptions: {
+                    shortcuts: [
+                        {
+                            text: this.$i18n.t('message.nearly_a_week'),
+                            value() {
+                                const end = new Date();
+                                const start = new Date();
+                                start.setTime(start.getTime() - microsecondsDay * 7);
+                                return [start, end];
+                            }
+                        },
+                        {
+                            text: this.$i18n.t('message.nearly_a_month'),
+                            value() {
+                                const end = new Date();
+                                const start = new Date();
+                                start.setTime(start.getTime() - microsecondsDay * 30);
+                                return [start, end];
+                            }
+                        },
+                        {
+                            text: this.$i18n.t('message.nearly_three_month'),
+                            value() {
+                                const end = new Date();
+                                const start = new Date();
+                                start.setTime(start.getTime() - microsecondsDay * 90);
+                                return [start, end];
+                            }
+                        }
+                    ]
+                }
             };
         },
         computed: {
@@ -118,7 +145,6 @@
                 let visits = [];
                 let getVisitsCount = 0;
 
-                console.log(option);
                 this.$Spin.show();
                 if (chrome.history) {
                     chrome.history.search({
@@ -163,7 +189,7 @@
                 } else {
                     setTimeout(() => {
                         this.setData(mockData.visitData);
-                    }, 2000);
+                    }, 500);
                 }
             },
             setData(datas) {
@@ -211,5 +237,10 @@
         height: 49px;
         line-height: 49px;
         padding: 0 30px;
+    }
+
+    .ivu-picker-panel-sidebar {
+        width: 110px;
+        margin-left: -110px;
     }
 </style>

@@ -1,23 +1,36 @@
 <template>
     <div ref='table-view' class='table' :style="{height:tableHeight + 'px'}">
         <div class="item header">
-            <Checkbox class="checkbox" v-model="allSelect" @on-change="onAllSelect"></Checkbox>
+            <input class="checkbox" type="checkbox" v-model="allSelect" @change="onAllSelect"></input>
             <span class="visitTime">{{$t('message.table_visitTime')}}</span>
             <span class="title">{{$t('message.table_title')}}</span>
             <span class="url">url</span>
             <!--<span class="count">{{$t('message.table_visitCount')}}</span>-->
         </div>
-        <div ref="list-view" style="flex-grow: 1">
-            <CheckboxGroup v-model="selectCroup" @on-change="onSelect">
+        <div ref="list-view" style="flex-grow: 1;overflow-y: auto;">
+
+            <div v-if="true" class="item" v-for="(data,index) in datas">
+                <!--<div v-if="!loadCheckbox" class="checkbox"></div>
+                <Checkbox v-else class="checkbox" :label="data.id"><span></span></Checkbox>-->
+                <input class="checkbox" type="checkbox" :value="data.id" v-model="selectCroup"></input>
+                <span class="visitTime">{{data.date}}</span>
+                <img class="website-icon" id="icon"
+                     v-lazy="'chrome://favicon/size/16@1x/' + data.url"/>
+                <span class="title">{{data.title}}</span>
+                <span class="url">{{data.url}}</span>
+                <span class="menu" @click="showMenu(data)">┇</span>
+                <!--<span class="count">{{data.visitCount}}</span>-->
+            </div>
+            <CheckboxGroup v-else v-model="selectCroup" @on-change="onSelect">
                 <recycle-list ref="recycle-list" :style="{height:listHeight + 'px'}"
                               :on-fetch="onFetch" :size="20">
                     <div class="item" slot="item" slot-scope="{ data }">
                         <div v-if="!loadCheckbox" class="checkbox"></div>
                         <Checkbox v-else class="checkbox" :label="data.id"><span></span></Checkbox>
                         <span class="visitTime">{{data.date}}</span>
-                        <span class="website-icon" id="icon"
+                        <!--<span class="website-icon" id="icon"
                               :style="{'background-image': `-webkit-image-set(url(chrome://favicon/size/16@1x/${data.url}) 1x, url(chrome://favicon/size/16@2x/${data.url}) 2x)`}"></span>
-                        <span class="title">{{data.title}}</span>
+                        --><span class="title">{{data.title}}</span>
                         <span class="url">{{data.url}}</span>
                         <span class="menu" @click="showMenu(data)">┇</span>
                         <!--<span class="count">{{data.visitCount}}</span>-->
@@ -72,13 +85,19 @@
                     this.isLoaded = false;
                     this.loadCheckbox = false;
                     this.$refs['recycle-list'].init();
+                    setTimeout(() => {//checkbox 导致列表渲染异常缓慢.异步显示
+                        this.loadCheckbox = true;
+                    }, 0);
                 }
             },
             selection: function (val, oldVal) {
                 if (val.length === 0 && val.length !== oldVal.length) {
                     this.allSelect = false;
-                    this.onAllSelect(false);
+                    this.onAllSelect({target: {checked: false}});
                 }
+            },
+            selectCroup: function () {
+                this.actionSelection(this.selectCroup);
             }
         },
         created() {
@@ -93,6 +112,9 @@
             ...mapActions({
                 actionSelection: types.APP.selection,
             }),
+            getIcon() {
+                return 'https://wx2.sinaimg.cn/mw690/7cebaed8ly1fxp5e9qfghj20xc0m4apx.jpg';
+            },
             showMenu(item) {
                 this.menu.item = item;
                 this.menu.show = true;
@@ -124,8 +146,8 @@
             onSelect() {
                 this.actionSelection(this.selectCroup);
             },
-            onAllSelect(status) {
-                if (status) {
+            onAllSelect(event) {
+                if (event.target.checked) {
                     this.selectCroup = [];
                     for (let i = 0; i < this.datas.length; i++) {
                         this.selectCroup.push(this.datas[i].id);
@@ -152,6 +174,7 @@
             background-color: #f8f8f9 !important;
             height: 40px !important;
             line-height: 40px !important;
+            flex-shrink: 0;
 
             .title {
                 margin-left: 20px !important;
@@ -202,6 +225,7 @@
             .website-icon {
                 width: 16px;
                 height: 16px;
+                flex-shrink: 0;
             }
 
             .url {
