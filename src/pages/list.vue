@@ -8,19 +8,20 @@
             <!--<span class="count">{{$t('message.table_visitCount')}}</span>-->
         </div>
         <div ref="list-view" style="flex-grow: 1;overflow-y: auto;">
-
-            <div v-if="true" class="item" v-for="(data,index) in datas">
-                <!--<div v-if="!loadCheckbox" class="checkbox"></div>
-                <Checkbox v-else class="checkbox" :label="data.id"><span></span></Checkbox>-->
-                <input class="checkbox" type="checkbox" :value="data.id" v-model="selectCroup"></input>
-                <span class="visitTime">{{data.date}}</span>
-                <img class="website-icon" id="icon"
-                     v-lazy="'chrome://favicon/size/16@1x/' + data.url"/>
-                <span class="title">{{data.title}}</span>
-                <span class="url">{{data.url}}</span>
-                <span class="menu" @click="showMenu(data)">┇</span>
-                <!--<span class="count">{{data.visitCount}}</span>-->
-            </div>
+            <Scroll v-if="true" :on-reach-bottom="handleReachBottom" :height="listHeight">
+                <div class="item" v-for="(data,index) in datas">
+                    <!--<div v-if="!loadCheckbox" class="checkbox"></div>
+                    <Checkbox v-else class="checkbox" :label="data.id"><span></span></Checkbox>-->
+                    <input class="checkbox" type="checkbox" :value="data.id" v-model="selectCroup"></input>
+                    <span class="visitTime">{{data.date}}</span>
+                    <img v-if="inChrome" class="website-icon" id="icon"
+                         v-lazy="'chrome://favicon/size/16@1x/' + data.url"/>
+                    <span class="title">{{data.title}}</span>
+                    <span class="url">{{data.url}}</span>
+                    <span class="menu" @click="showMenu(data)">┇</span>
+                    <!--<span class="count">{{data.visitCount}}</span>-->
+                </div>
+            </Scroll>
             <CheckboxGroup v-else v-model="selectCroup" @on-change="onSelect">
                 <recycle-list ref="recycle-list" :style="{height:listHeight + 'px'}"
                               :on-fetch="onFetch" :size="20">
@@ -70,26 +71,16 @@
                 menu: {
                     show: false,
                     item: {},
-                }
+                },
+                datas: [],
             };
         },
         computed: {
             ...mapGetters({
-                datas: types.APP.datas,
                 selection: types.APP.selection,
             })
         },
         watch: {
-            datas: function (val) {
-                if (this.$refs['recycle-list']) {
-                    this.isLoaded = false;
-                    this.loadCheckbox = false;
-                    this.$refs['recycle-list'].init();
-                    setTimeout(() => {//checkbox 导致列表渲染异常缓慢.异步显示
-                        this.loadCheckbox = true;
-                    }, 0);
-                }
-            },
             selection: function (val, oldVal) {
                 if (val.length === 0 && val.length !== oldVal.length) {
                     this.allSelect = false;
@@ -107,14 +98,19 @@
                 this.tableHeight = this.$refs['table-view'].offsetHeight;
                 this.listHeight = this.$refs['list-view'].offsetHeight;
             });
+            this.getHistory({
+                startTime: 0,
+                endTime: new Date().getTime(),
+                maxResults: 50,
+                callback: (data) => {
+                    this.datas = this.datas.concat(data);
+                }
+            });
         },
         methods: {
             ...mapActions({
                 actionSelection: types.APP.selection,
             }),
-            getIcon() {
-                return 'https://wx2.sinaimg.cn/mw690/7cebaed8ly1fxp5e9qfghj20xc0m4apx.jpg';
-            },
             showMenu(item) {
                 this.menu.item = item;
                 this.menu.show = true;
@@ -130,17 +126,16 @@
                 }
                 this.menu.show = false;
             },
-            onFetch() {
+            handleReachBottom() {
                 return new Promise((resolve) => {
-                    if (!this.isLoaded) {
-                        this.isLoaded = true;
-                        resolve(this.datas);
-                    } else {
-                        resolve(false);
-                    }
-                    setTimeout(() => {//checkbox 导致列表渲染异常缓慢.异步显示
-                        this.loadCheckbox = true;
-                    }, 0);
+                    this.getHistory({
+                        endTime: this.datas[this.datas.length - 1].visitTime,
+                        maxResults: 50,
+                        callback: (data) => {
+                            this.datas = this.datas.concat(data);
+                            resolve();
+                        }
+                    });
                 });
             },
             onSelect() {
@@ -172,8 +167,8 @@
 
         .header {
             background-color: #f8f8f9 !important;
-            height: 40px !important;
-            line-height: 40px !important;
+            height: 30px !important;
+            line-height: 30px !important;
             flex-shrink: 0;
 
             .title {

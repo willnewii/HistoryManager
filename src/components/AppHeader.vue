@@ -76,8 +76,7 @@
             })
         },
         created() {
-            this.doSearch();
-
+            // this.doSearch();
             EventBus.$on(Constants.EventBus.search, (value) => {
                 this.keyword = new URL(value.url).hostname;
                 this.search();

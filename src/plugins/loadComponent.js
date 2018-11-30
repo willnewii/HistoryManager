@@ -14,6 +14,7 @@ import {
     Layout,
     Input,
     Modal,
+    Scroll
 } from 'iview';
 
 Vue.component('DatePicker', DatePicker);
@@ -28,6 +29,7 @@ Vue.component('Spin', Spin);
 Vue.component('Layout', Layout);
 Vue.component('Input', Input);
 Vue.component('Modal', Modal);
+Vue.component('Scroll', Scroll);
 
 Vue.prototype.$Spin = Spin;
 
