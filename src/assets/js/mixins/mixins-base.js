@@ -24,6 +24,11 @@ export default {
         };
     },
     methods: {
+        /*chrome.history.deleteRange({
+                               startTime: tempdatas[i].visitTime,
+                               endTime: tempdatas[i].visitTime + 1
+                           }, () => {
+                           });*/
         //获取历史记录
         getHistory(option) {
             if (!chrome.history) {
@@ -37,6 +42,13 @@ export default {
 
             let visits = [];
             let getVisitsCount = 0;
+
+            console.log({
+                'text': option.text,
+                'startTime': option.startTime || 0,
+                'endTime': option.endTime,
+                'maxResults': option.maxResults
+            });
 
             chrome.history.search({
                     'text': option.text,

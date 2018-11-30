@@ -8,13 +8,10 @@
             <!--<span class="count">{{$t('message.table_visitCount')}}</span>-->
         </div>
         <div ref="list-view" style="flex-grow: 1;overflow-y: auto;">
-
             <div v-if="true" class="item" v-for="(data,index) in datas">
-                <!--<div v-if="!loadCheckbox" class="checkbox"></div>
-                <Checkbox v-else class="checkbox" :label="data.id"><span></span></Checkbox>-->
                 <input class="checkbox" type="checkbox" :value="data.id" v-model="selectCroup"></input>
                 <span class="visitTime">{{data.date}}</span>
-                <img class="website-icon" id="icon"
+                <img v-if="inChrome" class="website-icon" id="icon"
                      v-lazy="'chrome://favicon/size/16@1x/' + data.url"/>
                 <span class="title">{{data.title}}</span>
                 <span class="url">{{data.url}}</span>
@@ -81,6 +78,9 @@
         },
         watch: {
             datas: function (val) {
+                if (this.$refs['list-view']) {
+                    this.$refs['list-view'].scrollTop = 0;
+                }
                 if (this.$refs['recycle-list']) {
                     this.isLoaded = false;
                     this.loadCheckbox = false;

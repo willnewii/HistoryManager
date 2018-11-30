@@ -8,7 +8,7 @@
 
             <div class="result">{{$t('message.resultCount', [datas.length])}}</div>
             <Input v-model="keyword" icon="ios-search" :placeholder="$t('message.str_search')"
-                   class="search" @on-click="doSearch"/>
+                   class="search" @on-click="doSearch" @on-enter="doSearch"/>
 
             <Date-Picker @on-change='onDateChange' style="width: 200px;"
                          type="daterange" split-panels
@@ -22,9 +22,8 @@
     import {mapGetters, mapActions} from "vuex";
     import * as types from "../vuex/mutation-types";
 
-    import {util, EventBus, Constants, mixins} from "../assets/js/index";
+    import {EventBus, Constants, mixins} from "../assets/js/index";
 
-    import mockData from '../mock';
     import dayjs from 'dayjs';
 
     const microsecondsDay = 1000 * 3600 * 24;
@@ -109,17 +108,11 @@
                 for (let i = 0; i < tempdatas.length; i++) {
                     if (this.selection.indexOf(tempdatas[i].id) !== -1) {
                         if (this.inChrome) {
-                            console.log(tempdatas[i].url);
                             //删除当前URL的所有记录
                             chrome.history.deleteUrl({
                                 url: tempdatas[i].url,
                             }, () => {
                             });
-                            /*chrome.history.deleteRange({
-                                startTime: tempdatas[i].visitTime,
-                                endTime: tempdatas[i].visitTime + 1
-                            }, () => {
-                            });*/
                         }
                         let index = tempdatas.indexOf(tempdatas[i]);
                         tempdatas.splice(index, 1);
@@ -139,65 +132,21 @@
             search(option = {}) {
                 console.time('数据查询');
                 option.endTime = option.endTime || (new Date).getTime();
-                option.startTime = option.startTime || option.endTime - microsecondsDay * 7;
+                option.startTime = option.startTime || this.keyword ? 0 : option.endTime - microsecondsDay * 7;
                 option.text = this.keyword || '';
 
-                let visits = [];
-                let getVisitsCount = 0;
-
                 this.$Spin.show();
-                if (chrome.history) {
-                    chrome.history.search({
-                            'text': option.text,
-                            'startTime': option.startTime, //默认查询最近一天
-                            'endTime': option.endTime,
-                            'maxResults': 10000
-                        },
-                        (historyItems) => {
-                            getVisitsCount = historyItems.length;
-
-                            if (getVisitsCount === 0) {
-                                this.setData([]);
-                                return;
-                            }
-
-                            for (let item of historyItems) {
-                                chrome.history.getVisits({
-                                    url: item.url
-                                }, (lists) => {
-                                    getVisitsCount--;
-                                    let results = lists.filter((value) => {
-                                        value.url = item.url;
-                                        value.title = item.title;
-                                        value.visitCount = item.visitCount;
-                                        return (value.visitTime >= option.startTime && value.visitTime < option.endTime);
-                                    });
-                                    //visits = visits.concat(results);
-                                    //只显示时间段内最近的一条
-                                    visits.push(results[results.length - 1]);
-                                    if (getVisitsCount === 0) {
-
-                                        visits.sort(function (a, b) {
-                                            return b.visitTime - a.visitTime;
-                                        });
-
-                                        this.setData(visits);
-                                    }
-                                });
-                            }
-                        });
-                } else {
-                    setTimeout(() => {
-                        this.setData(mockData.visitData);
-                    }, 500);
-                }
+                this.getHistory({
+                    'text': option.text,
+                    'startTime': option.startTime, //默认查询最近一天
+                    'endTime': option.endTime,
+                    'maxResults': 5000,
+                    'callback': (data) => {
+                        this.setData(data);
+                    }
+                });
             },
             setData(datas) {
-                //提前赋值,减少列表滑动时计算
-                for (let i = 0; i < datas.length; i++) {
-                    datas[i].date = util.formatTime(datas[i].visitTime);
-                }
-
                 console.timeEnd('数据查询');
                 this.$Spin.hide();
                 this.actionDatas(datas);
