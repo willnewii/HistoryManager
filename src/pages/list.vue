@@ -14,7 +14,7 @@
                 <img v-if="inChrome" class="website-icon" id="icon"
                      v-lazy="'chrome://favicon/size/16@1x/' + data.url"/>
                 <span class="title">{{data.title}}</span>
-                <span class="url">{{data.url}}</span>
+                <span class="url" @click="openWindow(data.url)">{{data.url}}</span>
                 <span class="menu" @click="showMenu(data)">┇</span>
                 <!--<span class="count">{{data.visitCount}}</span>-->
             </div>
@@ -37,6 +37,7 @@
         </div>
         <Modal v-model="menu.show" :closable="false" class-name="vertical-center-modal">
             <span>{{menu.item.url}}</span>
+            <p class="modal-item-p" @click="action(2)">打开</p>
             <p class="modal-item-p" @click="action(0)">来自该网站的更多内容</p>
             <p class="modal-item-p" @click="action(1)">从历史记录中移除</p>
             <div slot="footer">
@@ -112,9 +113,6 @@
             ...mapActions({
                 actionSelection: types.APP.selection,
             }),
-            getIcon() {
-                return 'https://wx2.sinaimg.cn/mw690/7cebaed8ly1fxp5e9qfghj20xc0m4apx.jpg';
-            },
             showMenu(item) {
                 this.menu.item = item;
                 this.menu.show = true;
@@ -126,6 +124,12 @@
                         break;
                     case 1://删除
                         EventBus.$emit(Constants.EventBus.delete, this.menu.item);
+                        break;
+                    case 2://打开
+                        chrome.tabs.create({
+                            selected: true,
+                            url: this.menu.item.url
+                        });
                         break;
                 }
                 this.menu.show = false;
@@ -141,6 +145,12 @@
                     setTimeout(() => {//checkbox 导致列表渲染异常缓慢.异步显示
                         this.loadCheckbox = true;
                     }, 0);
+                });
+            },
+            openWindow(url) {
+                chrome.tabs.create({
+                    selected: true,
+                    url: url
                 });
             },
             onSelect() {
