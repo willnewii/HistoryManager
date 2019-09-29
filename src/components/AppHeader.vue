@@ -2,7 +2,7 @@
     <Header>
         <div class="header-nav">
             <div class="actions" v-if="selection && selection.length > 0">
-                <Button class="button" @click="doDelete">{{$t('message.btn_delete')}}({{selection.length}})</Button>
+                <Button class="button" type="error" @click="doDelete">{{$t('message.btn_delete')}}({{selection.length}})</Button>
                 <Button class="button" @click="doCancle">{{$t('message.btn_cancel')}}</Button>
             </div>
 
@@ -130,6 +130,7 @@
                 this.search();
             },
             search(option = {}) {
+                //TODO:搜索策略变更
                 console.time('数据查询');
                 option.endTime = option.endTime || (new Date).getTime();
                 option.startTime = option.startTime || this.keyword ? 0 : option.endTime - microsecondsDay * 7;

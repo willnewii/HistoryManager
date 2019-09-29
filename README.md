@@ -5,3 +5,6 @@
 ### 参考文档
 - [360浏览器开发文档](http://open.se.360.cn/open/extension_dev/overview.html)
 - [过渡类型](http://open.se.360.cn/open/extension_dev/history.html#transition_types)
+
+- 搜索策略优化
+- 点击图表直接跳转相关结果
