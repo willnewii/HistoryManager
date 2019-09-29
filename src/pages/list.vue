@@ -8,32 +8,15 @@
             <!--<span class="count">{{$t('message.table_visitCount')}}</span>-->
         </div>
         <div ref="list-view" style="flex-grow: 1;overflow-y: auto;">
-            <div v-if="true" class="item" v-for="(data,index) in datas">
-                <input class="checkbox" type="checkbox" :value="data.id" v-model="selectCroup"></input>
+            <div class="item" v-for="(data,index) in datas" :key="index" @click.stop="openWindow(data.url)">
+                <input class="checkbox" type="checkbox" :value="data.id" v-model="selectGroup" v-on:click.stop/>
                 <span class="visitTime">{{data.date}}</span>
-                <img v-if="inChrome" class="website-icon" id="icon"
-                     v-lazy="'chrome://favicon/size/16@1x/' + data.url"/>
+                <img v-if="inChrome" class="website-icon" id="icon" v-lazy="'chrome://favicon/size/16@1x/' + data.url"/>
                 <span class="title">{{data.title}}</span>
-                <span class="url" @click="openWindow(data.url)">{{data.url}}</span>
-                <span class="menu" @click="showMenu(data)">┇</span>
+                <span class="url" >{{data.url}}</span>
+                <span class="menu" @click.stop="showMenu(data)">┇</span>
                 <!--<span class="count">{{data.visitCount}}</span>-->
             </div>
-            <CheckboxGroup v-else v-model="selectCroup" @on-change="onSelect">
-                <recycle-list ref="recycle-list" :style="{height:listHeight + 'px'}"
-                              :on-fetch="onFetch" :size="20">
-                    <div class="item" slot="item" slot-scope="{ data }">
-                        <div v-if="!loadCheckbox" class="checkbox"></div>
-                        <Checkbox v-else class="checkbox" :label="data.id"><span></span></Checkbox>
-                        <span class="visitTime">{{data.date}}</span>
-                        <!--<span class="website-icon" id="icon"
-                              :style="{'background-image': `-webkit-image-set(url(chrome://favicon/size/16@1x/${data.url}) 1x, url(chrome://favicon/size/16@2x/${data.url}) 2x)`}"></span>
-                        --><span class="title">{{data.title}}</span>
-                        <span class="url">{{data.url}}</span>
-                        <span class="menu" @click="showMenu(data)">┇</span>
-                        <!--<span class="count">{{data.visitCount}}</span>-->
-                    </div>
-                </recycle-list>
-            </CheckboxGroup>
         </div>
         <Modal v-model="menu.show" :closable="false" class-name="vertical-center-modal">
             <span>{{menu.item.url}}</span>
@@ -60,11 +43,10 @@
         data() {
             return {
                 tableHeight: 0,
-                listHeight: 0,
                 isLoaded: false,
                 loadCheckbox: false,
                 allSelect: false,
-                selectCroup: [],
+                selectGroup: [],
                 menu: {
                     show: false,
                     item: {},
@@ -97,8 +79,8 @@
                     this.onAllSelect({target: {checked: false}});
                 }
             },
-            selectCroup: function () {
-                this.actionSelection(this.selectCroup);
+            selectGroup: function () {
+                this.actionSelection(this.selectGroup);
             }
         },
         created() {
@@ -106,8 +88,15 @@
         mounted() {
             this.$nextTick(() => {
                 this.tableHeight = this.$refs['table-view'].offsetHeight;
-                this.listHeight = this.$refs['list-view'].offsetHeight;
             });
+        },
+        activated() {
+            console.log(this.$route);
+            if (this.$route.query.host){
+                EventBus.$emit(Constants.EventBus.search, {keyword:this.$route.query.host});
+            }else if (this.$route.query.day){
+                EventBus.$emit(Constants.EventBus.search, {day:this.$route.query.day});
+            }
         },
         methods: {
             ...mapActions({
@@ -120,7 +109,7 @@
             action(type) {
                 switch (type) {
                     case 0://搜索
-                        EventBus.$emit(Constants.EventBus.search, this.menu.item);
+                        EventBus.$emit(Constants.EventBus.search, {keyword:new URL(this.menu.item.url).hostname});
                         break;
                     case 1://删除
                         EventBus.$emit(Constants.EventBus.delete, this.menu.item);
@@ -154,16 +143,16 @@
                 });
             },
             onSelect() {
-                this.actionSelection(this.selectCroup);
+                this.actionSelection(this.selectGroup);
             },
             onAllSelect(event) {
                 if (event.target.checked) {
-                    this.selectCroup = [];
+                    this.selectGroup = [];
                     for (let i = 0; i < this.datas.length; i++) {
-                        this.selectCroup.push(this.datas[i].id);
+                        this.selectGroup.push(this.datas[i].id);
                     }
                 } else {
-                    this.selectCroup = [];
+                    this.selectGroup = [];
                 }
                 this.onSelect();
             },

@@ -48,6 +48,7 @@ module.exports = {
             'vuex',
             'vue-router',
             'vue-i18n',
+            'vue-lazyload',
             'highcharts/highcharts',
             'dayjs',
             'iview/src/components/button',
@@ -57,6 +58,8 @@ module.exports = {
             'iview/src/components/spin',
             'iview/src/components/icon',
             'iview/src/components/layout',
+            'iview/src/components/modal',
+            'iview/src/components/menu',
             'iview/dist/styles/iview.css'
         ]
     }

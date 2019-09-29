@@ -1,4 +1,4 @@
-import mockData from '../../../mock';
+import mockData from '@/mock';
 import * as util from '../util';
 
 export default {
@@ -30,7 +30,11 @@ export default {
                            }, () => {
                            });*/
         //获取历史记录
+        //TODO:分页加载
         getHistory(option) {
+            console.log(option);
+            
+
             if (!chrome.history) {
                 option.callback && option.callback(mockData.visitData.slice(0, 50));
                 return;
@@ -43,16 +47,11 @@ export default {
             let visits = [];
             let getVisitsCount = 0;
 
-            console.log({
-                'text': option.text,
-                'startTime': option.startTime || 0,
-                'endTime': option.endTime,
-                'maxResults': option.maxResults
-            });
+            console.log(option);
 
             chrome.history.search({
                     'text': option.text,
-                    'startTime': option.startTime || 0,
+                    'startTime': option.startTime,
                     'endTime': option.endTime,
                     'maxResults': option.maxResults
                 },
@@ -64,7 +63,7 @@ export default {
                         return;
                     }
 
-                    for (let item of historyItems) {
+                    historyItems.forEach((item)=>{
                         chrome.history.getVisits({
                             url: item.url
                         }, (lists) => {
@@ -83,14 +82,15 @@ export default {
                                 /*visits.sort(function (a, b) {
                                     return b.visitTime - a.visitTime;
                                 });*/
-
-                                for (let i = 0; i < visits.length; i++) {
-                                    visits[i].date = util.formatTime(visits[i].visitTime);
-                                }
+                                
+                                //格式化时间
+                                visits.forEach((item,index,list)=>{
+                                    list[index].date = util.formatTime(list[index].visitTime);
+                                });
                                 option.callback && option.callback(visits);
                             }
                         });
-                    }
+                    });
                 });
         },
         pagePause() {

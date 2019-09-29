@@ -72,7 +72,7 @@ const messages = {
 };
 
 const i18n = new VueI18n({
-    locale: window.navigator.language === '1zh-CN' ? 'zh-CN' : 'en', // set locale
+    locale: window.navigator.language.toLocaleLowerCase() === 'zh-cn' ? 'zh-CN' : 'en', // set locale
     messages, // set locale messages
 });
 
