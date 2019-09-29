@@ -82,6 +82,11 @@
                         minPointWidth: 1,
                         dataLabels: {
                             enabled: true,
+                        },
+                        events: {
+                            click: (event) => {
+                                this.pushPage({name: Constants.PageName.list, query: {day: event.point.category}});
+                            }
                         }
                     }]
                 });
@@ -119,6 +124,11 @@
                     series: [{
                         name: '网站排行',
                         data: datas,
+                        events: {
+                            click: (event) => {
+                                this.pushPage({name: Constants.PageName.list, query: {host: event.point.name}});
+                            }
+                        }
                     }]
                 });
             }

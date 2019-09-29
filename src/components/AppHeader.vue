@@ -2,7 +2,9 @@
     <Header>
         <div class="header-nav">
             <div class="actions" v-if="selection && selection.length > 0">
-                <Button class="button" type="error" @click="doDelete">{{$t('message.btn_delete')}}({{selection.length}})</Button>
+                <Button class="button" type="error" @click="doDelete">
+                    {{$t('message.btn_delete')}}({{selection.length}})
+                </Button>
                 <Button class="button" @click="doCancle">{{$t('message.btn_cancel')}}</Button>
             </div>
 
@@ -35,6 +37,8 @@
         data() {
             return {
                 keyword: '',
+                startTime: 0,
+                endTime: 0,
                 dataOptions: {
                     shortcuts: [
                         {
@@ -77,9 +81,16 @@
         created() {
             this.doSearch();
 
-            EventBus.$on(Constants.EventBus.search, (value) => {
-                this.keyword = new URL(value.url).hostname;
-                this.search();
+            EventBus.$on(Constants.EventBus.search, (option) => {
+                if (option.keyword) {
+                    this.keyword = option.keyword;
+                }
+                if (option.day) {
+                    this.keyword = '';
+                    this.startTime = dayjs(option.day).valueOf();
+                    this.endTime = dayjs(option.day).add(1, 'day').valueOf();
+                }
+                this.doSearch();
             });
 
             EventBus.$on(Constants.EventBus.delete, (value) => {
@@ -96,11 +107,9 @@
                     return;
                 }
 
-                let option = {
-                    startTime: dayjs(values[0]).valueOf(),
-                    endTime: dayjs(values[1]).valueOf() + microsecondsDay
-                };
-                this.search(option);
+                this.startTime = dayjs(values[0]).valueOf();
+                this.endTime = dayjs(values[1]).valueOf();
+                this.doSearch();
             },
             doDelete() {
                 let tempdatas = JSON.parse(JSON.stringify(this.datas));
@@ -127,14 +136,37 @@
                 this.actionSelection([]);
             },
             doSearch() {
-                this.search();
+                this.search({
+                    startTime: this.startTime,
+                    endTime: this.endTime,
+                    text: this.keyword
+                });
             },
             search(option = {}) {
+                // console.trace();
                 //TODO:搜索策略变更
                 console.time('数据查询');
-                option.endTime = option.endTime || (new Date).getTime();
-                option.startTime = option.startTime || this.keyword ? 0 : option.endTime - microsecondsDay * 7;
-                option.text = this.keyword || '';
+                let date = new Date();
+                date.setHours(0);
+                date.setMinutes(0);
+                date.setSeconds(0);
+                date.setMilliseconds(0);
+
+                // 默认范围最近七天的记录
+                if (!option.startTime && !option.endTime) {
+                    option.startTime = option.startTime || dayjs(date.getTime()).subtract(6, 'day').valueOf();
+                    option.endTime = option.endTime || dayjs(date.getTime()).add(1, 'day').valueOf();
+                } else {
+                    //endTime应该包括当天日期
+                    option.endTime = dayjs(option.endTime).add(1, 'day').valueOf();
+                }
+                option.text = option.text || '';
+
+                console.log({
+                    'text': option.text,
+                    'startTime': dayjs(option.startTime).format('{YYYY} MM-DDTHH:mm:ss SSS [Z] A'), //默认查询最近一天
+                    'endTime': dayjs(option.endTime).format('{YYYY} MM-DDTHH:mm:ss SSS [Z] A'),
+                });
 
                 this.$Spin.show();
                 this.getHistory({

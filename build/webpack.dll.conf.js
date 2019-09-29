@@ -36,7 +36,7 @@ webpackConfig = {
             {
                 test: /\.js$/,
                 loader: 'babel-loader',
-                include: [resolve('node_modules/vue-lib')]
+                include: [ resolve('node_modules/iview')]
             },
             {
                 test: /\.(woff2?|eot|ttf|otf|svg)(\?.*)?$/,

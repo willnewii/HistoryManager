@@ -27,18 +27,18 @@ const webpackConfig = merge(baseWebpackConfig, {
     },
     optimization: {
         minimizer: [
-            /*new UglifyJsPlugin({
+            new UglifyJsPlugin({
                 cache: true,
                 parallel: true,
                 sourceMap: config.build.productionSourceMap,
                 uglifyOptions: {
                     warnings: false,
                     compress: {
-                        drop_console: true,
-                        drop_debugger: true,
+                        drop_console: process.env.ENV_DEV !== 'true',
+                        drop_debugger: process.env.ENV_DEV !== 'true',
                     }
                 }
-            }),*/
+            }),
             new OptimizeCSSPlugin({
                 cssProcessorOptions: config.build.productionSourceMap
                     ? {safe: true, map: {inline: false}}
@@ -96,7 +96,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     ]
 });
 
-if (config.build.productionGzip) {
+if (config.build.productionGzip && process.env.ENV_DEV !== 'true') {
     var CompressionWebpackPlugin = require('compression-webpack-plugin');
 
     webpackConfig.plugins.push(

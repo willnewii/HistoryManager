@@ -1,4 +1,4 @@
-import mockData from '../../../mock';
+import mockData from '@/mock';
 import * as util from '../util';
 
 export default {
@@ -30,6 +30,7 @@ export default {
                            }, () => {
                            });*/
         //获取历史记录
+        //TODO:分页加载
         getHistory(option) {
             if (!chrome.history) {
                 option.callback && option.callback(mockData.visitData.slice(0, 50));
@@ -43,55 +44,51 @@ export default {
             let visits = [];
             let getVisitsCount = 0;
 
-            console.log({
-                'text': option.text,
-                'startTime': option.startTime || 0,
-                'endTime': option.endTime,
-                'maxResults': option.maxResults
-            });
+            console.log(option);
 
             chrome.history.search({
-                    'text': option.text,
-                    'startTime': option.startTime || 0,
-                    'endTime': option.endTime,
-                    'maxResults': option.maxResults
-                },
-                (historyItems) => {
-                    getVisitsCount = historyItems.length;
+                        'text': option.text,
+                        'startTime': option.startTime,
+                        'endTime': option.endTime,
+                        'maxResults': option.maxResults
+                    },
+                    (historyItems) => {
+                        getVisitsCount = historyItems.length;
 
-                    if (getVisitsCount === 0) {
-                        option.callback && option.callback(visits);
-                        return;
-                    }
+                        if (getVisitsCount === 0) {
+                            option.callback && option.callback(visits);
+                            return;
+                        }
 
-                    for (let item of historyItems) {
-                        chrome.history.getVisits({
-                            url: item.url
-                        }, (lists) => {
-                            getVisitsCount--;
-                            let results = lists.filter((value) => {
-                                value.url = item.url;
-                                value.title = item.title;
-                                value.visitCount = item.visitCount;
-                                return (value.visitTime >= option.startTime && value.visitTime < option.endTime);
-                            });
-                            //visits = visits.concat(results);
-                            //只显示时间段内最近的一条
-                            visits.push(results[results.length - 1]);
-                            if (getVisitsCount === 0) {
+                        historyItems.forEach((item) => {
+                            chrome.history.getVisits({
+                                url: item.url
+                            }, (lists) => {
+                                getVisitsCount--;
+                                let results = lists.filter((value) => {
+                                    value.url = item.url;
+                                    value.title = item.title;
+                                    value.visitCount = item.visitCount;
+                                    return (value.visitTime >= option.startTime && value.visitTime < option.endTime);
+                                });
+                                //visits = visits.concat(results);
+                                //只显示时间段内最近的一条
+                                visits.push(results[results.length - 1]);
+                                if (getVisitsCount === 0) {
 
-                                /*visits.sort(function (a, b) {
-                                    return b.visitTime - a.visitTime;
-                                });*/
+                                    /*visits.sort(function (a, b) {
+                                        return b.visitTime - a.visitTime;
+                                    });*/
 
-                                for (let i = 0; i < visits.length; i++) {
-                                    visits[i].date = util.formatTime(visits[i].visitTime);
+                                    //格式化时间
+                                    visits.forEach((item, index, list) => {
+                                        list[index].date = util.formatTime(list[index].visitTime);
+                                    });
+                                    option.callback && option.callback(visits);
                                 }
-                                option.callback && option.callback(visits);
-                            }
+                            });
                         });
-                    }
-                });
+                    });
         },
         pagePause() {
             this._pagePause && this._pagePause();
