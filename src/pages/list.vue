@@ -13,7 +13,7 @@
                 <span class="visitTime">{{data.date}}</span>
                 <img v-if="inChrome" class="website-icon" id="icon" v-lazy="'chrome://favicon/size/16@1x/' + data.url"/>
                 <span class="title">{{data.title}}</span>
-                <span class="url" >{{data.url}}</span>
+                <span class="url">{{data.url}}</span>
                 <span class="menu" @click.stop="showMenu(data)">┇</span>
                 <!--<span class="count">{{data.visitCount}}</span>-->
             </div>
@@ -92,10 +92,10 @@
         },
         activated() {
             console.log(this.$route);
-            if (this.$route.query.host){
-                EventBus.$emit(Constants.EventBus.search, {keyword:this.$route.query.host});
-            }else if (this.$route.query.day){
-                EventBus.$emit(Constants.EventBus.search, {day:this.$route.query.day});
+            if (this.$route.query.host) {
+                EventBus.$emit(Constants.EventBus.search, {keyword: this.$route.query.host});
+            } else if (this.$route.query.day) {
+                EventBus.$emit(Constants.EventBus.search, {day: this.$route.query.day});
             }
         },
         methods: {
@@ -109,7 +109,7 @@
             action(type) {
                 switch (type) {
                     case 0://搜索
-                        EventBus.$emit(Constants.EventBus.search, {keyword:new URL(this.menu.item.url).hostname});
+                        EventBus.$emit(Constants.EventBus.search, {keyword: new URL(this.menu.item.url).hostname});
                         break;
                     case 1://删除
                         EventBus.$emit(Constants.EventBus.delete, this.menu.item);

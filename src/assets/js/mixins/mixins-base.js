@@ -50,48 +50,48 @@ export default {
             console.log(option);
 
             chrome.history.search({
-                    'text': option.text,
-                    'startTime': option.startTime,
-                    'endTime': option.endTime,
-                    'maxResults': option.maxResults
-                },
-                (historyItems) => {
-                    getVisitsCount = historyItems.length;
+                        'text': option.text,
+                        'startTime': option.startTime,
+                        'endTime': option.endTime,
+                        'maxResults': option.maxResults
+                    },
+                    (historyItems) => {
+                        getVisitsCount = historyItems.length;
 
-                    if (getVisitsCount === 0) {
-                        option.callback && option.callback(visits);
-                        return;
-                    }
+                        if (getVisitsCount === 0) {
+                            option.callback && option.callback(visits);
+                            return;
+                        }
 
-                    historyItems.forEach((item)=>{
-                        chrome.history.getVisits({
-                            url: item.url
-                        }, (lists) => {
-                            getVisitsCount--;
-                            let results = lists.filter((value) => {
-                                value.url = item.url;
-                                value.title = item.title;
-                                value.visitCount = item.visitCount;
-                                return (value.visitTime >= option.startTime && value.visitTime < option.endTime);
-                            });
-                            //visits = visits.concat(results);
-                            //只显示时间段内最近的一条
-                            visits.push(results[results.length - 1]);
-                            if (getVisitsCount === 0) {
-
-                                /*visits.sort(function (a, b) {
-                                    return b.visitTime - a.visitTime;
-                                });*/
-                                
-                                //格式化时间
-                                visits.forEach((item,index,list)=>{
-                                    list[index].date = util.formatTime(list[index].visitTime);
+                        historyItems.forEach((item) => {
+                            chrome.history.getVisits({
+                                url: item.url
+                            }, (lists) => {
+                                getVisitsCount--;
+                                let results = lists.filter((value) => {
+                                    value.url = item.url;
+                                    value.title = item.title;
+                                    value.visitCount = item.visitCount;
+                                    return (value.visitTime >= option.startTime && value.visitTime < option.endTime);
                                 });
-                                option.callback && option.callback(visits);
-                            }
+                                //visits = visits.concat(results);
+                                //只显示时间段内最近的一条
+                                visits.push(results[results.length - 1]);
+                                if (getVisitsCount === 0) {
+
+                                    /*visits.sort(function (a, b) {
+                                        return b.visitTime - a.visitTime;
+                                    });*/
+
+                                    //格式化时间
+                                    visits.forEach((item, index, list) => {
+                                        list[index].date = util.formatTime(list[index].visitTime);
+                                    });
+                                    option.callback && option.callback(visits);
+                                }
+                            });
                         });
                     });
-                });
         },
         pagePause() {
             this._pagePause && this._pagePause();
