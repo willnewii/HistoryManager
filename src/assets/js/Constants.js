@@ -7,6 +7,7 @@ export const PageName = {
     analyze: 'analyze',
     list: 'list',
     table: 'table',
+    layout: 'layout',
     app: 'app'
 };
 

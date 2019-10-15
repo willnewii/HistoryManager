@@ -11,8 +11,6 @@
     import {mapGetters, mapActions} from "vuex";
     import * as types from "../vuex/mutation-types";
 
-    import mockData from '../mock';
-
     export default {
         mixins: [mixins.base],
         name: Constants.PageName.list,
@@ -81,7 +79,7 @@
             },
             //统计同一域名
             getPageView() {
-                analyze.getPageView(mockData.visitData);
+                // analyze.getPageView(mockData.visitData);
             }
         }
     };

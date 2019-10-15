@@ -1,4 +1,3 @@
-import mockData from '@/mock';
 import * as util from '../util';
 
 export default {
@@ -29,14 +28,39 @@ export default {
                                endTime: tempdatas[i].visitTime + 1
                            }, () => {
                            });*/
+        //删除当前URL的所有记录
+        deleteHistory(option) {
+            if (!chrome.history) {
+                console.log('do deleteHistory');
+                return;
+            }
+            if (option.url) {
+                chrome.history.deleteUrl({
+                    url: option.url,
+                }, () => {
+                });
+            }
+        },
         //获取历史记录
         //TODO:分页加载
         getHistory(option) {
-            console.log(option);
-            
-
             if (!chrome.history) {
-                option.callback && option.callback(mockData.visitData.slice(0, 50));
+                let mockDatas = [];
+
+                for (let i = 0; i < 100; i++) {
+                    mockDatas.push({
+                        "id": i,
+                        "referringVisitId": "0",
+                        "transition": "link",
+                        "visitId": "684990",
+                        "visitTime": 1541413414688.761,
+                        "url": "https://www.npmjs.com/package/electron-dl",
+                        "title": i + "---electron-dl - npm",
+                        "visitCount": 3
+                    });
+                }
+
+                option.callback && option.callback(mockDatas);
                 return;
             }
 
@@ -46,8 +70,6 @@ export default {
 
             let visits = [];
             let getVisitsCount = 0;
-
-            console.log(option);
 
             chrome.history.search({
                         'text': option.text,

@@ -14,12 +14,12 @@
                 <img v-if="inChrome" class="website-icon" id="icon" v-lazy="'chrome://favicon/size/16@1x/' + data.url"/>
                 <span class="title">{{data.title}}</span>
                 <span class="url">{{data.url}}</span>
-                <span class="menu" @click.stop="showMenu(data)">┇</span>
+                <span class="menu" @click.stop="showMenu(data,index)">┇</span>
                 <!--<span class="count">{{data.visitCount}}</span>-->
             </div>
         </div>
         <Modal v-model="menu.show" :closable="false" class-name="vertical-center-modal">
-            <span>{{menu.item.url}}</span>
+            <span class="title">{{menu.item.url}}</span>
             <p class="modal-item-p" @click="action(2)">打开</p>
             <p class="modal-item-p" @click="action(0)">来自该网站的更多内容</p>
             <p class="modal-item-p" @click="action(1)">从历史记录中移除</p>
@@ -60,7 +60,7 @@
             })
         },
         watch: {
-            datas: function (val) {
+            datas: function (val, oldVal) {
                 if (this.$refs['list-view']) {
                     this.$refs['list-view'].scrollTop = 0;
                 }
@@ -91,7 +91,6 @@
             });
         },
         activated() {
-            console.log(this.$route);
             if (this.$route.query.host) {
                 EventBus.$emit(Constants.EventBus.search, {keyword: this.$route.query.host});
             } else if (this.$route.query.day) {
@@ -102,8 +101,9 @@
             ...mapActions({
                 actionSelection: types.APP.selection,
             }),
-            showMenu(item) {
+            showMenu(item, index) {
                 this.menu.item = item;
+                this.menu.item.index = index;
                 this.menu.show = true;
             },
             action(type) {
@@ -195,6 +195,7 @@
             border-bottom: 1px solid #e8eaec;
             height: 48px;
             line-height: 48px;
+            cursor: pointer;
 
             span {
                 word-break: break-all;
@@ -273,6 +274,13 @@
         display: flex;
         align-items: center;
         justify-content: center;
+
+        .title {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         .ivu-modal {
             top: 0;
