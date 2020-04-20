@@ -23,7 +23,7 @@ function getPageView(visitData) {
     dates.reverse();
     count.reverse();
 
-    return {dates, count};
+    return { dates, count };
 }
 
 function getTopSite(visitData) {
@@ -35,12 +35,11 @@ function getTopSite(visitData) {
 
         if (hosts.indexOf(host) === -1) {
             hosts.push(host);
-            counts[hosts.length - 1] = {count: 1, ...item};
+            counts[hosts.length - 1] = { count: 1, ...item };
         } else {
             ++counts[hosts.indexOf(host)].count;
         }
     }
-
 
     counts.sort(function (a, b) {
         return b.count - a.count;
@@ -49,4 +48,4 @@ function getTopSite(visitData) {
     return counts;
 }
 
-export {getPageView, getTopSite};
+export { getPageView, getTopSite };

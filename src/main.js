@@ -8,11 +8,10 @@ Vue.config.devtools = true;
 import router from './plugins/router';
 
 // vuex
-import store from "./vuex/store";
+import store from './vuex/store';
 
 // 注册全局组件
-import {i18n} from './plugins/loadComponent';
-
+import { i18n } from './plugins/loadComponent';
 
 import {} from './assets/js/mixins/mixins-base';
 /*
@@ -46,7 +45,6 @@ new Vue({
 /*window.addEventListener("offline", function () {
     alert("网络连接已断开");
 });*/
-
 
 /*window.addEventListener("load", function () {
     navigator.serviceWorker.register('../sw.js').then(function (reg) {

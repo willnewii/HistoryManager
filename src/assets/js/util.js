@@ -39,7 +39,7 @@ function px2rem(px, designWidth) {
         designWidth = defaultDesignWidth;
     }
 
-    return parseInt(px, 10) * 320 / designWidth / 20;
+    return (parseInt(px, 10) * 320) / designWidth / 20;
 }
 
 function deepCopy(source) {
@@ -54,4 +54,4 @@ function formatTime(time) {
     return dayjs(time).format('YYYY-MM-DD HH:mm:ss');
 }
 
-export {px2rem, deepCopy, formatTime, getDayTime};
+export { px2rem, deepCopy, formatTime, getDayTime };

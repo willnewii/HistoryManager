@@ -12,19 +12,15 @@ export const PageName = {
 };
 
 //用于管理是否需要使用keepAlive缓存
-export const keepAlive = [
-    PageName.list,
-    PageName.analyze,
-];
+export const keepAlive = [PageName.list, PageName.analyze];
 
 //用于管理LocalStorage key
 export const LocalStorage = {
-    test: 'test',
+    test: 'test'
 };
-
 
 //用于管理EventBus中的事件key
 export const EventBus = {
     search: 'search',
-    delete: 'delete',
+    delete: 'delete'
 };

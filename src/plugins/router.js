@@ -8,7 +8,7 @@ function generateRoute(name, meta) {
         path: name,
         name: name,
         component: Pages[name],
-        meta: Object.assign({keepAlive: true}, meta)
+        meta: Object.assign({ keepAlive: true }, meta)
     };
 }
 
@@ -22,12 +22,12 @@ let routes = [
             {
                 path: '',
                 component: Pages[Constants.PageName.list],
-                meta: Object.assign({keepAlive: true},  {title: '历史记录'})
+                meta: Object.assign({ keepAlive: true }, { title: '历史记录' })
             },
-            generateRoute(Constants.PageName.list, {title: '历史记录'}),
-            generateRoute(Constants.PageName.analyze, {title: '数据分析'})
-        ],
-    },
+            generateRoute(Constants.PageName.list, { title: '历史记录' }),
+            generateRoute(Constants.PageName.analyze, { title: '数据分析' })
+        ]
+    }
 ];
 
 /* routes.push({
@@ -39,7 +39,6 @@ let routes = [
 let router = new Router({
     routes
 });
-
 
 router.afterEach((to, from) => {
     if (to.meta && to.meta.title) {

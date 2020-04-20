@@ -6,8 +6,8 @@ import * as types from '../mutation-types';
 export default {
     state: {
         app: {
-            datas: [],       //搜索结果
-            selection: []    //已选择列表
+            datas: [], //搜索结果
+            selection: [] //已选择列表
         }
     },
     mutations: {
@@ -16,7 +16,7 @@ export default {
         },
         [types.APP.selection](state, value) {
             state.app.selection = value;
-        },
+        }
     },
     actions: {
         [types.APP.datas](context, value) {
@@ -24,7 +24,7 @@ export default {
         },
         [types.APP.selection](context, value) {
             context.commit(types.APP.selection, value);
-        },
+        }
     },
     getters: {
         [types.APP.datas](state) {
@@ -32,7 +32,6 @@ export default {
         },
         [types.APP.selection](state) {
             return state.app.selection;
-        },
-
+        }
     }
 };

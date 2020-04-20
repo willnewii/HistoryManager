@@ -3,18 +3,7 @@ import VueI18n from 'vue-i18n';
 
 import 'iview/dist/styles/iview.css';
 
-import {
-    DatePicker,
-    Button,
-    Header,
-    Menu,
-    Icon,
-    Sider,
-    Spin,
-    Layout,
-    Input,
-    Modal,
-} from 'iview';
+import { DatePicker, Button, Header, Menu, Icon, Sider, Spin, Layout, Input, Modal } from 'iview';
 
 Vue.component('DatePicker', DatePicker);
 Vue.component('Button', Button);
@@ -48,8 +37,8 @@ const messages = {
             table_visitCount: '查看次数',
             nearly_a_week: '近一周',
             nearly_a_month: '近一月',
-            nearly_three_month: '近三月',
-        },
+            nearly_three_month: '近三月'
+        }
     },
     en: {
         message: {
@@ -65,19 +54,18 @@ const messages = {
             table_visitCount: 'count',
             nearly_a_week: '1 week ago',
             nearly_a_month: '1 month ago',
-            nearly_three_month: '3 months ago',
-        },
-    },
-
+            nearly_three_month: '3 months ago'
+        }
+    }
 };
 
 const i18n = new VueI18n({
     locale: window.navigator.language.toLocaleLowerCase() === 'zh-cn' ? 'zh-CN' : 'en', // set locale
-    messages, // set locale messages
+    messages // set locale messages
 });
 
 import VueLazyload from 'vue-lazyload';
 
 Vue.use(VueLazyload);
 
-export {i18n};
+export { i18n };

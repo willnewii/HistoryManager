@@ -7,7 +7,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     modules: {
-        app,
+        app
     },
     strict: process.env.NODE_ENV !== 'production'
 });
