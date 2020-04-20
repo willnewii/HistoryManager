@@ -56,6 +56,7 @@ export default {
                         transition: 'link',
                         visitId: '684990',
                         visitTime: 1541413414688.761,
+                        date: util.formatTime(1541413414688.761),
                         url: 'https://www.npmjs.com/package/electron-dl',
                         title: i + '---electron-dl - npm',
                         visitCount: 3
@@ -99,10 +100,7 @@ export default {
                                     value.url = item.url;
                                     value.title = item.title;
                                     value.visitCount = item.visitCount;
-                                    return (
-                                        value.visitTime >= option.startTime &&
-                                        value.visitTime < option.endTime
-                                    );
+                                    return value.visitTime >= option.startTime && value.visitTime < option.endTime;
                                 });
                                 //visits = visits.concat(results);
                                 //只显示时间段内最近的一条

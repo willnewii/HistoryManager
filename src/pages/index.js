@@ -6,7 +6,7 @@ let page = {};
 page[Constants.PageName.layout] = (resolve) => require(['../components/AppLayout.vue'], resolve);
 
 page[Constants.PageName.list] = (resolve) => require(['./list.vue'], resolve);
-page[Constants.PageName.table] = (resolve) => require(['./table.vue'], resolve);
+// page[Constants.PageName.table] = (resolve) => require(['./table.vue'], resolve);
 page[Constants.PageName.analyze] = (resolve) => require(['./analyze.vue'], resolve);
 
 /*.forEach((item) => {

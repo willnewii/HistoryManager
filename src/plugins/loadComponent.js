@@ -32,7 +32,7 @@ const messages = {
             resultCount: '{0} 条数据',
             title_history: '历史记录',
             title_analyze: '分析',
-            table_visitTime: '查看时间',
+            table_visitTime: '时间',
             table_title: '标题',
             table_visitCount: '查看次数',
             nearly_a_week: '近一周',

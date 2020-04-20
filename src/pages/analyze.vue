@@ -1,7 +1,7 @@
 <template>
-    <div class="page">
-        <div ref="chart2"></div>
-        <div ref="chart1"></div>
+    <div ref="view" class="page" :style="{ height: viewHeight + 'px' }">
+        <div class="chart2" ref="chart2"></div>
+        <div class="chart1" ref="chart1"></div>
     </div>
 </template>
 
@@ -17,7 +17,9 @@ export default {
     mixins: [mixins.base],
     name: Constants.PageName.analyze,
     data() {
-        return {};
+        return {
+            viewHeight: 0
+        };
     },
     computed: {
         ...mapGetters({
@@ -33,9 +35,12 @@ export default {
     },
     created() {},
     mounted() {
-        if (this.datas.length > 0) {
-            this.getDatas();
-        }
+        this.$nextTick(() => {
+            this.viewHeight = this.$refs['view'].offsetHeight;
+            if (this.datas.length > 0) {
+                this.getDatas();
+            }
+        });
     },
     methods: {
         getDatas() {
@@ -150,6 +155,9 @@ export default {
 @import '../assets/scss/params';
 
 .page {
-    padding: 10px 0;
+    flex-grow: 1;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
 }
 </style>

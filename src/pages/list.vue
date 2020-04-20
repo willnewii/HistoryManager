@@ -49,10 +49,10 @@ import { Constants, EventBus, mixins } from '../assets/js/index';
 
 import { mapGetters, mapActions } from 'vuex';
 import * as types from '../vuex/mutation-types';
-import RecycleList from '../components/recycle-list';
+// import RecycleList from '../components/recycle-list';
 
 export default {
-    components: { RecycleList },
+    // components: { RecycleList },
     mixins: [mixins.base],
     name: Constants.PageName.list,
     data() {
