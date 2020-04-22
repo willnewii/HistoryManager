@@ -1,30 +1,28 @@
 <template>
     <div ref="view" class="page" :style="{ height: viewHeight + 'px' }">
-        <div class="chart2" ref="chart2"></div>
-        <div class="chart1" ref="chart1"></div>
+        <app-header id="analyze" @onData="onData" :count="datas.length" :type="1"></app-header>
+        <div style="overflow-y: auto;">
+            <div class="chart2" ref="chart2"></div>
+            <div class="chart1" ref="chart1"></div>
+        </div>
     </div>
 </template>
 
 <script>
 import { Constants, mixins, util, analyze } from '../assets/js/index';
 
-import { mapGetters, mapActions } from 'vuex';
-import * as types from '../vuex/mutation-types';
 import Highcharts from '../assets/js/hc';
+import AppHeader from '../components/AppHeader';
 
 export default {
-    components: {},
+    components: { AppHeader },
     mixins: [mixins.base],
     name: Constants.PageName.analyze,
     data() {
         return {
-            viewHeight: 0
+            viewHeight: 0,
+            datas: 0
         };
-    },
-    computed: {
-        ...mapGetters({
-            datas: types.APP.datas
-        })
     },
     watch: {
         datas: function (val) {
@@ -43,6 +41,9 @@ export default {
         });
     },
     methods: {
+        onData(data) {
+            this.datas = data;
+        },
         getDatas() {
             this.getPageView();
 
@@ -156,7 +157,6 @@ export default {
 
 .page {
     flex-grow: 1;
-    padding: 20px 0;
     display: flex;
     flex-direction: column;
 }

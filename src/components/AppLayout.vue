@@ -1,6 +1,5 @@
 <template>
     <Layout class="layout">
-        <app-header></app-header>
         <Layout>
             <Sider class="sider" hide-trigger :style="{ background: '#fff' }">
                 <Menu :active-name="menuIndex" theme="light" width="auto">
@@ -9,6 +8,7 @@
                 </Menu>
             </Sider>
             <Layout>
+<!--                <app-header></app-header>-->
                 <keep-alive :include="keepAliveArray">
                     <router-view></router-view>
                 </keep-alive>
@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { EventBus, Constants, mixins } from '../assets/js/index';
+import { Constants, mixins } from '../assets/js/index';
 import AppHeader from '../components/AppHeader';
 
 export default {
@@ -28,29 +28,31 @@ export default {
     data() {
         return {
             menuIndex: '1',
-            selection: [],
-            datas: [],
-            keepAliveArray: Constants.keepAlive,
-            toast: {
-                show: false,
-                message: '',
-                Timer: null
-            }
+            keepAliveArray: Constants.keepAlive
         };
     },
+    beforeRouteEnter(to, from, next) {
+        next((vm) => {
+            vm.updateIndex(to.name, vm);
+        });
+    },
     beforeRouteUpdate(to, from, next) {
-        switch (to.name) {
-            case Constants.PageName.list:
-                this.menuIndex = '1';
-                break;
-            case Constants.PageName.analyze:
-                this.menuIndex = '2';
-                break;
-        }
+        this.updateIndex(to.name, this);
         next();
     },
     created() {},
-    methods: {}
+    methods: {
+        updateIndex(name, vm) {
+            switch (name) {
+                case Constants.PageName.list:
+                    vm.menuIndex = '1';
+                    break;
+                case Constants.PageName.analyze:
+                    vm.menuIndex = '2';
+                    break;
+            }
+        }
+    }
 };
 </script>
 

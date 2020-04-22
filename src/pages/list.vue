@@ -1,5 +1,13 @@
 <template>
     <div ref="table-view" class="table" :style="{ height: tableHeight + 'px' }">
+        <app-header @onData="onData" :count="datas.length">
+            <template v-if="selectGroup && selectGroup.length > 0">
+                <Button class="button" type="error" @click="doDelete">
+                    {{ $t('message.btn_delete') }}({{ selectGroup.length }})
+                </Button>
+                <Button class="button" @click="doCancle">{{ $t('message.btn_cancel') }}</Button>
+            </template>
+        </app-header>
         <div class="item header">
             <input class="checkbox" type="checkbox" v-model="allSelect" @change="onAllSelect" />
             <span class="visitTime">{{ $t('message.table_visitTime') }}</span>
@@ -8,19 +16,8 @@
             <!--<span class="count">{{$t('message.table_visitCount')}}</span>-->
         </div>
         <div ref="list-view" style="flex-grow: 1; overflow-y: auto;">
-            <div
-                class="item"
-                v-for="(data, index) in datas"
-                :key="index"
-                @click.stop="openWindow(data.url)"
-            >
-                <input
-                    class="checkbox"
-                    type="checkbox"
-                    :value="data.id"
-                    v-model="selectGroup"
-                    v-on:click.stop
-                />
+            <div class="item" v-for="(data, index) in datas" :key="index" @click.stop="openWindow(data.url)">
+                <input class="checkbox" type="checkbox" :value="data.id" v-model="selectGroup" v-on:click.stop />
                 <span class="visitTime">{{ data.date }}</span>
                 <img
                     v-if="inChrome"
@@ -47,35 +44,29 @@
 <script>
 import { Constants, EventBus, mixins } from '../assets/js/index';
 
-import { mapGetters, mapActions } from 'vuex';
-import * as types from '../vuex/mutation-types';
-// import RecycleList from '../components/recycle-list';
+import AppHeader from '../components/AppHeader';
 
 export default {
-    // components: { RecycleList },
+    components: { AppHeader },
     mixins: [mixins.base],
     name: Constants.PageName.list,
     data() {
         return {
             tableHeight: 0,
-            isLoaded: false,
-            loadCheckbox: false,
             allSelect: false,
+            datas: [],
             selectGroup: [],
             menu: {
                 show: false,
                 item: {}
-            }
+            },
+            loadCheckbox: false,
+            isLoaded: false
         };
     },
-    computed: {
-        ...mapGetters({
-            datas: types.APP.datas,
-            selection: types.APP.selection
-        })
-    },
+    computed: {},
     watch: {
-        datas: function (val, oldVal) {
+        /*datas: function (val, oldVal) {
             if (this.$refs['list-view']) {
                 this.$refs['list-view'].scrollTop = 0;
             }
@@ -88,16 +79,7 @@ export default {
                     this.loadCheckbox = true;
                 }, 0);
             }
-        },
-        selection: function (val, oldVal) {
-            if (val.length === 0 && val.length !== oldVal.length) {
-                this.allSelect = false;
-                this.onAllSelect({ target: { checked: false } });
-            }
-        },
-        selectGroup: function () {
-            this.actionSelection(this.selectGroup);
-        }
+        }*/
     },
     created() {},
     mounted() {
@@ -113,9 +95,6 @@ export default {
         }
     },
     methods: {
-        ...mapActions({
-            actionSelection: types.APP.selection
-        }),
         showMenu(item, index) {
             this.menu.item = item;
             this.menu.item.index = index;
@@ -155,24 +134,36 @@ export default {
             });
         },
         openWindow(url) {
-            chrome.tabs.create({
-                selected: true,
-                url: url
-            });
-        },
-        onSelect() {
-            this.actionSelection(this.selectGroup);
+            this.createWindow(url);
         },
         onAllSelect(event) {
+            this.selectGroup = [];
             if (event.target.checked) {
-                this.selectGroup = [];
-                for (let i = 0; i < this.datas.length; i++) {
-                    this.selectGroup.push(this.datas[i].id);
-                }
-            } else {
-                this.selectGroup = [];
+                this.selectGroup = this.datas.map((item) => {
+                    return item.id;
+                });
             }
-            this.onSelect();
+        },
+        onData(data) {
+            this.datas = data;
+        },
+        doCancle() {
+            this.allSelect = false;
+            this.selectGroup = [];
+        },
+        doDelete() {
+            for (let i = 0; i < this.datas.length; i++) {
+                if (this.selectGroup.indexOf(this.datas[i].id) !== -1) {
+                    this.deleteHistory({
+                        url: this.datas[i].url
+                    });
+                    let index = this.datas.indexOf(this.datas[i]);
+                    this.datas.splice(index, 1);
+                    i--;
+                }
+            }
+
+            this.doCancle();
         }
     }
 };

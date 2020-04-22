@@ -1,24 +1,32 @@
 <template>
     <Header>
         <div class="header-nav">
-            <div class="actions" v-if="selection && selection.length > 0">
-                <Button class="button" type="error" @click="doDelete">
-                    {{ $t('message.btn_delete') }}({{ selection.length }})
-                </Button>
-                <Button class="button" @click="doCancle">{{ $t('message.btn_cancel') }}</Button>
+            <div class="actions">
+                <slot></slot>
             </div>
 
-            <div class="result">{{ $t('message.resultCount', [datas.length]) }}</div>
-            <Input
-                v-model="keyword"
-                icon="ios-search"
-                :placeholder="$t('message.str_search')"
-                class="search"
-                @on-click="doSearch"
-                @on-enter="doSearch"
-            />
+            <div class="result">{{ $t('message.resultCount', [count]) }}</div>
+            <template v-if="type === 0">
+                <Input
+                    v-model="keyword"
+                    icon="ios-search"
+                    :placeholder="$t('message.str_search')"
+                    class="search"
+                    @on-click="doSearch"
+                    @on-enter="doSearch"
+                />
+                <Date-Picker
+                    @on-change="onDateChange"
+                    style="width: 200px;"
+                    :value="times[0]"
+                    type="date"
+                    placement="bottom-end"
+                    :placeholder="$t('message.pick_date')"
+                ></Date-Picker>
+            </template>
 
             <Date-Picker
+                v-if="type === 1"
                 @on-change="onDateChange"
                 style="width: 200px;"
                 :value="times"
@@ -45,7 +53,16 @@ const microsecondsDay = 1000 * 3600 * 24;
 export default {
     name: 'AppHeader',
     mixins: [mixins.base],
-    props: {},
+    props: {
+        type: {
+            type: Number,
+            default: 0
+        },
+        count: {
+            type: Number,
+            default: 0
+        }
+    },
     data() {
         return {
             keyword: '',
@@ -83,77 +100,47 @@ export default {
             }
         };
     },
-    computed: {
-        ...mapGetters({
-            datas: types.APP.datas,
-            selection: types.APP.selection
-        })
-    },
+    computed: {},
     created() {
-        // 默认范围最近七天的记录
+        console.log(this.slot);
         let date = util.getDayTime();
-        this.times = [
-            dayjs(date.getTime()).subtract(6, 'day').toDate(),
-            dayjs(date.getTime()).add(1, 'day').toDate()
-        ];
+        if (this.type === 1) {
+            // 默认范围最近七天的记录
+            this.times = [
+                dayjs(date.getTime()).subtract(6, 'day').toDate(),
+                dayjs(date.getTime()).add(1, 'day').toDate()
+            ];
+        } else {
+            // 默认范围最近一天的记录
+            this.times = [date, dayjs(date.getTime()).add(1, 'day').toDate()];
 
+            EventBus.$on(Constants.EventBus.search, (option) => {
+                if (option.keyword) {
+                    this.keyword = option.keyword;
+                }
+                if (option.day) {
+                    // 指定日期的搜索
+                    this.keyword = '';
+                    this.times = [dayjs(option.day).toDate(), dayjs(option.day).add(1, 'day').toDate()];
+                }
+                this.doSearch();
+            });
+        }
+
+        console.log(this.times);
         this.doSearch();
-
-        EventBus.$on(Constants.EventBus.search, (option) => {
-            if (option.keyword) {
-                this.keyword = option.keyword;
-            }
-            if (option.day) {
-                // 指定日期的搜索
-                this.keyword = '';
-                this.times = [dayjs(option.day).toDate(), dayjs(option.day).add(1, 'day').toDate()];
-            }
-            this.doSearch();
-        });
-
-        EventBus.$on(Constants.EventBus.delete, (item) => {
-            this.doDelete(item);
-        });
     },
     methods: {
-        ...mapActions({
-            actionDatas: types.APP.datas,
-            actionSelection: types.APP.selection
-        }),
         onDateChange(values) {
-            if (!values[0] && !values[1]) {
-                return;
+            if (Array.isArray(values) && values[0] && values[1]) {
+                this.times[0] = dayjs(values[0]).toDate();
+                this.times[1] = dayjs(values[1]).add(1, 'day').toDate();
+            } else {
+                this.times[0] = dayjs(values).toDate();
+                this.times[1] = dayjs(this.times[0]).add(1, 'day').toDate();
             }
-
-            this.times[0] = dayjs(values[0]).toDate();
-            this.times[1] = dayjs(values[1]).add(1, 'day').toDate();
 
             this.doSearch();
-        },
-        doDelete(item) {
-            let totalDatas = JSON.parse(JSON.stringify(this.datas));
-
-            if (item && !isNaN(item.index)) {
-                totalDatas.splice(item.index, 1);
-            } else {
-                //TODO: 返回下标数组
-                for (let i = 0; i < totalDatas.length; i++) {
-                    if (this.selection.indexOf(totalDatas[i].id) !== -1) {
-                        this.deleteHistory({
-                            url: totalDatas[i].url
-                        });
-                        let index = totalDatas.indexOf(totalDatas[i]);
-                        totalDatas.splice(index, 1);
-                        i--;
-                    }
-                }
-            }
-
-            this.actionDatas(totalDatas);
-            this.doCancle();
-        },
-        doCancle() {
-            this.actionSelection([]);
         },
         doSearch() {
             this.search({
@@ -183,14 +170,11 @@ export default {
                 endTime: option.endTime.getTime(),
                 maxResults: 5000,
                 callback: (data) => {
-                    this.setData(data);
+                    console.timeEnd('数据查询');
+                    this.$Spin.hide();
+                    this.$emit('onData', data);
                 }
             });
-        },
-        setData(datas) {
-            console.timeEnd('数据查询');
-            this.$Spin.hide();
-            this.actionDatas(datas);
         }
     }
 };

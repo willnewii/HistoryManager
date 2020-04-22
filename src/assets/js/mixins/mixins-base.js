@@ -23,6 +23,12 @@ export default {
         };
     },
     methods: {
+        createWindow(url) {
+            chrome.tabs.create({
+                selected: true,
+                url: url
+            });
+        },
         /*chrome.history.deleteRange({
                                startTime: tempdatas[i].visitTime,
                                endTime: tempdatas[i].visitTime + 1
@@ -49,7 +55,6 @@ export default {
             if (!chrome.history) {
                 let mockDatas = [];
 
-                for (let i = 0; i < 100; i++) {
                     mockDatas.push({
                         id: i,
                         referringVisitId: '0',
