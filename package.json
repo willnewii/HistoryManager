@@ -15,7 +15,7 @@
         "build:stats": "webpack --config ./build/webpack.prod.conf.js --profile --json > stats.json"
     },
     "dependencies": {
-        "axios": "^0.18.1",
+        "axios": "^0.21.1",
         "dayjs": "^1.8.16",
         "highcharts": "^6.2.0",
         "hotcss": "^2.2.1",
