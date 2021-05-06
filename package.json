@@ -17,7 +17,7 @@
     "dependencies": {
         "axios": "^0.18.1",
         "dayjs": "^1.8.16",
-        "highcharts": "^6.2.0",
+        "highcharts": "^9.0.0",
         "hotcss": "^2.2.1",
         "iview": "^3.5.1",
         "vue": "^2.6.10",
